@@ -36,7 +36,8 @@
     "babel-plugin-transform-exponentiation-operator": "6.8.0",
     "buddy": "6.x.x",
     "expect.js": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "supertest": "*"
   },
   "main": "src/index.js",
   "repository": "https://github.com/YR/framework.git",

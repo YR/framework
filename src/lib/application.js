@@ -6,53 +6,64 @@ const Debug = require('debug');
  * Retrieve and initialise server instance
  * @param {Express} express
  * @param {String} id
- * @param {Object} config
+ * @param {Number} port
+ * @param {Object} options
  *  - {Function} handler
  *  - {Function} renderer
- *  - {String} locales
+ *  - {String} localesDir
+ *  - {Function} localesLoader
  *  - {Object} middleware
  *  - {Function} routes
- *  - {Array<String>} templates
- * @param {Object} options
- *  - {Function} localeLoader
  *  - {DataStore} settings
+ *  - {String} templatesDir
+ *  - {TemplateCache} templatesLoader
  * @returns {Express}
  */
-module.exports = function application (express, id, config, options) {
-  const { middleware } = config;
-  const { settings } = options;
+module.exports = function application (express, id, port, options) {
+  const {
+    handler,
+    localesDir,
+    localesLoader,
+    middleware,
+    renderer,
+    routes,
+    settings,
+    templatesDir,
+    templatesLoader
+  } = options;
   const app = express();
-  const port = settings.get('port');
-
-  // Store properties
-  options.debug = Debug(id);
-  options.id = id;
-  options.handlers = {};
-  options.renderers = {};
-  options.controller = config.controller;
-  options.layout = config.layout;
-  for (const key in options) {
-    app.set(key, options[key]);
-  }
+  const debug = Debug(id);
 
   // Load locales
-  if (options.localeLoader && config.locales) options.localeLoader(config.locales, settings.get('locale'));
+  if (localesLoader && localesDir) localesLoader(localesDir);
   // Load templates (server)
-  if (options.templateCache && config.templates) options.templateCache.load(config.templates);
+  if (templatesLoader && templatesDir) templatesLoader(templatesDir);
+
+  // Store properties
+  app.set('debug', debug);
+  app.set('handler', handler);
+  app.set('id', id);
+  app.set('localesLoader', localesLoader);
+  app.set('pages', {});
+  app.set('renderer', renderer);
+  app.set('settings', settings);
+  app.set('templatesLoader', templatesLoader);
+  app.set('view', null);
+  app.set('views', null);
 
   // Register pre-route middleware stack
-  if (middleware.pre) middleware.pre(app);
+  if (middleware && middleware.pre) middleware.pre(app);
 
   // Init components
-  if (config.controller) config.controller.init(id, app);
-  if (config.layout) config.layout.init(id, app);
-  if (config.routes) config.routes.init(app, settings);
+  if (handler) handler.init(id, app);
+  if (renderer) renderer.init(id, app);
+  if (routes) routes.init(app, settings);
 
   // Register post-route middleware stack
-  if (middleware.post) middleware.post(app);
+  if (middleware && middleware.post) middleware.post(app);
 
   app.set('server', app.listen(port));
-  options.debug(port ? `listening on: ${port}` : 'listening');
+  debug(port ? `listening on: ${port}` : 'listening');
 
   return app;
 };
