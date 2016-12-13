@@ -1,6 +1,7 @@
 'use strict';
 
 const Debug = require('debug');
+const page = require('./page');
 
 /**
  * Retrieve and initialise server instance
@@ -10,55 +11,60 @@ const Debug = require('debug');
  * @param {Object} options
  *  - {Function} handler
  *  - {Function} renderer
+ *  - {Object} locales
  *  - {String} localesDir
- *  - {Function} localesLoader
  *  - {Object} middleware
  *  - {Function} routes
  *  - {DataStore} settings
+ *  - {Object} templates
  *  - {String} templatesDir
- *  - {TemplateCache} templatesLoader
  * @returns {Express}
  */
 module.exports = function application (express, id, port, options) {
   const {
-    handler,
+    locales,
     localesDir,
-    localesLoader,
     middleware,
     renderer,
     routes,
     settings,
-    templatesDir,
-    templatesLoader
+    templates,
+    templatesDir
   } = options;
   const app = express();
   const debug = Debug(id);
 
-  // Load locales
-  if (localesLoader && localesDir) localesLoader(localesDir);
-  // Load templates (server)
-  if (templatesLoader && templatesDir) templatesLoader(templatesDir);
-
   // Store properties
   app.set('debug', debug);
-  app.set('handler', handler);
   app.set('id', id);
-  app.set('localesLoader', localesLoader);
-  app.set('pages', {});
-  app.set('renderer', renderer);
+  app.set('locales', locales);
   app.set('settings', settings);
-  app.set('templatesLoader', templatesLoader);
+  app.set('templates', templates);
   app.set('view', null);
   app.set('views', null);
 
+  if (renderer) renderer.init(id, app);
+  // Load locales
+  if (locales && localesDir) locales.load(localesDir);
+  // Load templates
+  if (templates && templatesDir) templates.load(templatesDir);
+
   // Register pre-route middleware stack
   if (middleware && middleware.pre) middleware.pre(app);
+  // Init pages/routes
+  if (routes) {
+    const pageRoutes = routes(app, settings);
 
-  // Init components
-  if (handler) handler.init(id, app);
-  if (renderer) renderer.init(id, app);
-  if (routes) routes.init(app, settings);
+    for (const id in pageRoutes) {
+      const { options, routes } = pageRoutes[id];
+      const { handler, hasOwnLayout } = page(app, id, options);
 
+      routes.forEach((route) => {
+        debug('handling %s at %s', id, route);
+        app.get(route, handler);
+      });
+    }
+  }
   // Register post-route middleware stack
   if (middleware && middleware.post) middleware.post(app);
 
