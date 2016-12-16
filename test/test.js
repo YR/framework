@@ -1,8 +1,10 @@
 'use strict';
 
 const application = require('../src/server');
+const barPage = require('./fixtures/pages/bar');
 const cacheControl = require('../src/lib/cacheControl');
 const expect = require('expect.js');
+const fooPage = require('./fixtures/pages/foo');
 const request = require('supertest');
 let app;
 
@@ -101,6 +103,36 @@ describe('framework', function () {
     it('should define settings on the app instance', function () {
       app = application('foo', 8080, {});
       expect(app.get('id')).to.equal('foo');
+    });
+    it('should initialize a page', function () {
+      app = application('foo', 8080, {
+        pages: {
+          foo: { pageFactory: fooPage, routes: ['/foo'] }
+        }
+      });
+      expect(app.get('pages')).to.have.property('foo');
+      expect(app.get('pages').foo).to.have.property('id', 'foo');
+    });
+  });
+
+  describe('pages', function () {
+    beforeEach(function () {
+      app = application('foo', 8080, {
+        pages: {
+          foo: { pageFactory: fooPage, routes: ['/foo'] },
+          bar: { pageFactory: barPage, routes: ['/bar'] }
+        }
+      });
+    });
+
+    it('should handle a matching route', function (done) {
+      request(app)
+        .get('/foo')
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res.text).to.equal('foo');
+          done();
+        });
     });
   });
 });
