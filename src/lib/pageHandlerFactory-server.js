@@ -1,5 +1,7 @@
 'use strict';
 
+const Page = require('./Page');
+
 /**
  * Handler factory for 'page'
  * @param {Page} page
@@ -7,11 +9,17 @@
  */
 module.exports = function pageHandlerFactory (page) {
   return function pageHandler (req, res, next) {
-    page.willHandle(req, res, (err) => {
+    page.init((err) => {
       if (err) return next(err);
       page.handle(req, res, (err) => {
         if (err) return next(err);
-        if (!res.finished) res.end();
+        // Prevent rendering unhandled/aborted
+        if (page.state & Page.HANDLED) {
+          page.render(req, res, (err) => {
+            if (err) return next(err);
+            if (!res.finished) res.end();
+          });
+        }
       });
     });
   };

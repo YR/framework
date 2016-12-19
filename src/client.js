@@ -2,6 +2,7 @@
 
 const application = require('./lib/application');
 const express = require('@yr/express-client');
+const pageHandlerFactory = require('./lib/pageHandlerFactory-client');
 
 /**
  * Retrieve and initialise client instance
@@ -14,5 +15,7 @@ const express = require('@yr/express-client');
  * @returns {Express}
  */
 module.exports = function server (id, options) {
+  if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
+
   return application(id, null, express, options);
 };

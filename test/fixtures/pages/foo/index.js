@@ -16,6 +16,6 @@ class FooPage extends Page {
     res.write('f');
     res.write('o');
     res.write('o');
-    done();
+    super.handle(req, res, done);
   }
 }

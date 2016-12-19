@@ -30,7 +30,7 @@ cacheControl(express.response);
  * @returns {Express}
  */
 module.exports = function server (id, port, options) {
-  options.pageHandlerFactory = pageHandlerFactory;
+  if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
 
   const app = application(id, port, express, options);
 

@@ -1,8 +1,8 @@
 'use strict';
 
-let changing = false;
+const Page = require('./Page');
+
 let current = null;
-let outstanding = 0;
 let pending = null;
 
 /**
@@ -12,15 +12,8 @@ let pending = null;
  */
 module.exports = function pageHandlerFactory (page) {
   return function pageHandler (req, res, next) {
-    if (changing) {
-      if (pending) {
-        // outstanding++;
-      }
-    }
-    changing = true;
     pending = page;
     changePage(req, res, (err) => {
-      changing = false;
       if (err) next(err);
     });
   };
@@ -33,20 +26,34 @@ module.exports = function pageHandlerFactory (page) {
  * @param {Function} done
  */
 function changePage (req, res, done) {
-  outstanding = 1;
+  const currentPage = current;
+  const pendingPage = pending;
+  let outstanding = 1;
 
-  if (current) {
+  current = null;
+
+  if (currentPage) {
     outstanding++;
-    current.unhandle(req, res, (err) => {
-      current = null;
+    currentPage.unhandle(req, res, (err) => {
       if (err) return done(err);
-      if (--outstanding <= 0) setPage(req, res, done);
+      // Unrender if already rendered
+      if (currentPage.state & Page.RENDERED) {
+        currentPage.unrender(req, res, (err) => {
+          if (err) return done(err);
+          if (--outstanding <= 0) setPage(req, res, done);
+        });
+      } else if (--outstanding <= 0) {
+        setPage(req, res, done);
+      }
     });
   }
 
-  pending.willHandle(req, res, (err) => {
-    if (err) return done(err);
-    if (--outstanding <= 0) setPage(req, res, done);
+  pendingPage.init((err) => {
+    // Protect against possible reassignment to new pending page
+    if (pendingPage === pending) {
+      if (err) return done(err);
+      if (--outstanding <= 0) setPage(req, res, done);
+    }
   });
 }
 
@@ -57,8 +64,16 @@ function changePage (req, res, done) {
  * @param {Function} done
  */
 function setPage (req, res, done) {
-  current = pending;
+  const currentPage = pending;
+
+  current = currentPage;
   pending = null;
   res.app.set('page', current);
-  current.handle(req, res, done);
+  currentPage.handle(req, res, (err) => {
+    if (err) return done(err);
+    // Protect against possible reassignment to new current page
+    if (!pending && currentPage === current && !(currentPage.state & Page.RENDERED)) {
+      currentPage.render(req, res, done);
+    }
+  });
 }

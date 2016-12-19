@@ -1,5 +1,9 @@
 'use strict';
 
+const INITED = 1;
+const HANDLED = 2;
+const RENDERED = 4;
+
 module.exports = class Page {
   /**
    * Page constructor
@@ -10,10 +14,10 @@ module.exports = class Page {
    *  - {String} localesDir
    *  - {String} templatesDir
    */
-  constructor (id, app, options) {
+  constructor (id, app, options = {}) {
     this.app = app;
     this.id = id;
-    this.active = false;
+    this.state = 0;
 
     const { config, localesDir, templatesDir } = options;
     const locales = app.get('locales');
@@ -29,12 +33,11 @@ module.exports = class Page {
   }
 
   /**
-   * Will handle 'req'
-   * @param {Request} req
-   * @param {Response} res
+   * Initialize
    * @param {Function} done
    */
-  willHandle (req, res, done) {
+  init (done) {
+    this.state |= INITED;
     done();
   }
 
@@ -45,26 +48,18 @@ module.exports = class Page {
    * @param {Function} done
    */
   handle (req, res, done) {
-    this.active = true;
+    this.state |= HANDLED;
     done();
   }
 
   /**
-   * Render with 'props'
-   * @param {Object} props
-   * @param {Function} done
-   */
-  render (props, done) {
-    done();
-  }
-
-  /**
-   * Will unhandle 'req'
+   * Render 'req'
    * @param {Request} req
    * @param {Response} res
    * @param {Function} done
    */
-  willUnhandle (req, res, done) {
+  render (req, res, done) {
+    this.state |= RENDERED;
     done();
   }
 
@@ -75,16 +70,22 @@ module.exports = class Page {
    * @param {Function} done
    */
   unhandle (req, res, done) {
-    this.active = false;
+    this.state &= ~HANDLED;
     done();
   }
 
   /**
-   * Unrender with 'props'
-   * @param {Object} props
+   * Unrender 'req'
+   * @param {Request} req
+   * @param {Response} res
    * @param {Function} done
    */
-  unrender (props, done) {
+  unrender (req, res, done) {
+    this.state &= ~RENDERED;
     done();
   }
 };
+
+module.exports.INITED = INITED;
+module.exports.HANDLED = HANDLED;
+module.exports.RENDERED = RENDERED;
