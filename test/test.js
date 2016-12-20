@@ -138,6 +138,34 @@ describe('framework', function () {
     describe('pageHandler', function () {
       let called;
 
+      class BasePage extends Page {
+        init (done) {
+          // console.log(this.id, 'init', this.state);
+          called.push(`init${this.id}`);
+          super.init(done);
+        }
+        handle (req, res, done) {
+          // console.log(this.id, 'handle', this.state);
+          called.push(`handle${this.id}`);
+          super.handle(req, res, done);
+        }
+        render (req, res, done) {
+          // console.log(this.id, 'render', this.state);
+          called.push(`render${this.id}`);
+          super.render(req, res, done);
+        }
+        unrender (req, res, done) {
+          // console.log(this.id, 'unrender', this.state);
+          called.push(`unrender${this.id}`);
+          super.unrender(req, res, done);
+        }
+        unhandle (req, res, done) {
+          // console.log(this.id, 'unhandle', this.state);
+          called.push(`unhandle${this.id}`);
+          super.unhandle(req, res, done);
+        }
+      }
+
       beforeEach(function () {
         called = [];
         app = {
@@ -147,24 +175,10 @@ describe('framework', function () {
             this.page = value;
           }
         };
+        clientPageHandlerFactory.reset();
       });
 
       it('should handle a page request', function (done) {
-        class P extends Page {
-          init (done) {
-            called.push('init');
-            super.init(done);
-          }
-          handle (req, res, done) {
-            called.push('handle');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render');
-            super.render(req, res, done);
-          }
-        }
-
         app = {
           get (key) {},
           set (key, value) {
@@ -172,213 +186,71 @@ describe('framework', function () {
             expect(value).to.equal(page);
           }
         };
-        const page = new P('page', app);
+        const page = new BasePage('1', app);
         const handler = clientPageHandlerFactory(page);
 
         handler({}, { app }, done);
-        expect(called).to.eql(['init', 'handle', 'render']);
+        expect(called).to.eql(['init1', 'handle1', 'render1']);
         expect(page.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
         done();
       });
       it('should unhandle an existing page request', function (done) {
-        class P1 extends Page {
-          init (done) {
-            called.push('init1');
-            super.init(done);
-          }
-          handle (req, res, done) {
-            called.push('handle1');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render1');
-            super.render(req, res, done);
-          }
-          unhandle (req, res, done) {
-            called.push('unhandle1');
-            super.unhandle(req, res, done);
-          }
-          unrender (req, res, done) {
-            called.push('unrender1');
-            super.unrender(req, res, done);
-          }
-        }
-        class P2 extends Page {
-          init (done) {
-            called.push('init2');
-            super.init(done);
-          }
-          handle (req, res, done) {
-            called.push('handle2');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render2');
-            super.render(req, res, done);
-          }
-          unhandle (req, res, done) {
-            called.push('unhandle2');
-            super.unhandle(req, res, done);
-          }
-          unrender (req, res, done) {
-            called.push('unrender2');
-            super.unrender(req, res, done);
-          }
-        }
-
-        const page1 = new P1('page1', app);
-        const page2 = new P2('page2', app);
+        const page1 = new BasePage('1', app);
+        const page2 = new BasePage('2', app);
         const handler1 = clientPageHandlerFactory(page1);
         const handler2 = clientPageHandlerFactory(page2);
 
         handler1({}, { app }, done);
         expect(called).to.eql(['init1', 'handle1', 'render1']);
         handler2({}, { app }, done);
-        expect(called).to.eql(['init1', 'handle1', 'render1', 'unhandle1', 'unrender1', 'init2', 'handle2', 'render2']);
-        expect(page1.state).to.equal(Page.INITED);
+        expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1', 'init2', 'handle2', 'render2']);
+        expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
         expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
         done();
       });
       it('should asynchronously unhandle an existing page request', function (done) {
-        class P1 extends Page {
-          init (done) {
-            called.push('init1');
-            super.init(done);
-          }
-          handle (req, res, done) {
-            called.push('handle1');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render1');
-            super.render(req, res, done);
-          }
+        class P1 extends BasePage {
           unhandle (req, res, done) {
             setTimeout(() => {
-              called.push('unhandle1');
               super.unhandle(req, res, done);
             }, 20);
           }
-          unrender (req, res, done) {
-            called.push('unrender1');
-            super.unrender(req, res, done);
-          }
         }
-        class P2 extends Page {
+        class P2 extends BasePage {
           init (done) {
             setTimeout(() => {
-              called.push('init2');
               super.init(done);
             }, 10);
           }
-          handle (req, res, done) {
-            called.push('handle2');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render2');
-            super.render(req, res, done);
-          }
-          unhandle (req, res, done) {
-            called.push('unhandle2');
-            super.unhandle(req, res, done);
-          }
-          unrender (req, res, done) {
-            called.push('unrender2');
-            super.unrender(req, res, done);
-          }
         }
 
-        const page1 = new P1('page1', app);
-        const page2 = new P2('page2', app);
+        const page1 = new P1('1', app);
+        const page2 = new P2('2', app);
         const handler1 = clientPageHandlerFactory(page1);
         const handler2 = clientPageHandlerFactory(page2);
 
         handler1({}, { app }, done);
         handler2({}, { app }, done);
         setTimeout(() => {
-          expect(called).to.eql(['init1', 'handle1', 'render1', 'init2', 'unhandle1', 'unrender1', 'handle2', 'render2']);
+          expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'init2', 'unhandle1', 'handle2', 'render2']);
           expect(app.page).to.equal(page2);
-          expect(page1.state).to.equal(Page.INITED);
+          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
           expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
           done();
         }, 50);
       });
       it('should handle another page request while unhandling an existing page request', function (done) {
-        class P1 extends Page {
-          init (done) {
-            called.push('init1');
-            super.init(done);
-          }
-          handle (req, res, done) {
-            called.push('handle1');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render1');
-            super.render(req, res, done);
-          }
-          unhandle (req, res, done) {
-            called.push('unhandle1');
-            super.unhandle(req, res, done);
-          }
-          unrender (req, res, done) {
-            called.push('unrender1');
-            super.unrender(req, res, done);
-          }
-        }
-        class P2 extends Page {
+        class P extends BasePage {
           init (done) {
             setTimeout(() => {
-              called.push('init2');
               super.init(done);
             }, 10);
-          }
-          handle (req, res, done) {
-            called.push('handle2');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render2');
-            super.render(req, res, done);
-          }
-          unhandle (req, res, done) {
-            called.push('unhandle2');
-            super.unhandle(req, res, done);
-          }
-          unrender (req, res, done) {
-            called.push('unrender2');
-            super.unrender(req, res, done);
-          }
-        }
-        class P3 extends Page {
-          init (done) {
-            setTimeout(() => {
-              called.push('init3');
-              super.init(done);
-            }, 10);
-          }
-          handle (req, res, done) {
-            called.push('handle3');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render3');
-            super.render(req, res, done);
-          }
-          unhandle (req, res, done) {
-            called.push('unhandle3');
-            super.unhandle(req, res, done);
-          }
-          unrender (req, res, done) {
-            called.push('unrender3');
-            super.unrender(req, res, done);
           }
         }
 
-        const page1 = new P1('page1', app);
-        const page2 = new P2('page2', app);
-        const page3 = new P3('page3', app);
+        const page1 = new BasePage('1', app);
+        const page2 = new P('2', app);
+        const page3 = new P('3', app);
         const handler1 = clientPageHandlerFactory(page1);
         const handler2 = clientPageHandlerFactory(page2);
         const handler3 = clientPageHandlerFactory(page3);
@@ -386,68 +258,34 @@ describe('framework', function () {
         handler1({}, { app }, done);
         handler2({}, { app }, done);
         handler3({}, { app }, done);
-        expect(called).to.eql(['init1', 'handle1', 'render1', 'unhandle1', 'unrender1']);
+        expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1']);
         setTimeout(() => {
-          expect(called).to.eql(['init1', 'handle1', 'render1', 'unhandle1', 'unrender1', 'init2', 'init3', 'handle3', 'render3']);
+          expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1', 'init2', 'init3', 'handle3', 'render3']);
           expect(app.page).to.equal(page3);
-          expect(page1.state).to.equal(Page.INITED);
+          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
           expect(page2.state).to.equal(Page.INITED);
           expect(page3.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
           done();
         }, 50);
       });
       it('should handle another page request while handling a page request', function (done) {
-        class P1 extends Page {
-          init (done) {
-            called.push('init1');
-            super.init(done);
-          }
+        class P1 extends BasePage {
           handle (req, res, done) {
             setTimeout(() => {
-              called.push('handle1');
               super.handle(req, res, done);
             }, 20);
           }
-          render (req, res, done) {
-            called.push('render1');
-            super.render(req, res, done);
-          }
-          unhandle (req, res, done) {
-            called.push('unhandle1');
-            super.unhandle(req, res, done);
-          }
-          unrender (req, res, done) {
-            called.push('unrender1');
-            super.unrender(req, res, done);
-          }
         }
-        class P2 extends Page {
+        class P2 extends BasePage {
           init (done) {
             setTimeout(() => {
-              called.push('init2');
               super.init(done);
             }, 10);
           }
-          handle (req, res, done) {
-            called.push('handle2');
-            super.handle(req, res, done);
-          }
-          render (req, res, done) {
-            called.push('render2');
-            super.render(req, res, done);
-          }
-          unhandle (req, res, done) {
-            called.push('unhandle2');
-            super.unhandle(req, res, done);
-          }
-          unrender (req, res, done) {
-            called.push('unrender2');
-            super.unrender(req, res, done);
-          }
         }
 
-        const page1 = new P1('page1', app);
-        const page2 = new P2('page2', app);
+        const page1 = new P1('1', app);
+        const page2 = new P2('2', app);
         const handler1 = clientPageHandlerFactory(page1);
         const handler2 = clientPageHandlerFactory(page2);
 
@@ -456,6 +294,8 @@ describe('framework', function () {
         expect(called).to.eql(['init1', 'unhandle1']);
         setTimeout(() => {
           expect(called).to.eql(['init1', 'unhandle1', 'init2', 'handle2', 'render2', 'handle1']);
+          expect(page1.state).to.equal(Page.INITED | Page.UNHANDLED);
+          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
           expect(app.page).to.equal(page2);
           done();
         }, 50);
