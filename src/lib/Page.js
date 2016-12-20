@@ -1,5 +1,7 @@
 'use strict';
 
+const runtime = require('@yr/runtime');
+
 const STATE = {
   INITING: 1,
   INITED: 2,
@@ -78,7 +80,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   init (done) {
-    done();
+    if (done) done();
   }
 
   /**
@@ -88,7 +90,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   handle (req, res, done) {
-    done();
+    if (done) done();
   }
 
   /**
@@ -98,7 +100,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   render (req, res, done) {
-    done();
+    if (done) done();
   }
 
   /**
@@ -108,7 +110,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   unrender (req, res, done) {
-    done();
+    if (done) done();
   }
 
   /**
@@ -118,7 +120,19 @@ module.exports = class Page {
    * @param {Function} done
    */
   unhandle (req, res, done) {
-    done();
+    if (done) done();
+  }
+
+  /**
+   * Rerender
+   * @param {Function} done
+   */
+  rerender (done) {
+    if (runtime.isBrowser) {
+      const { req, res } = this.app.getCurrentContext();
+
+      this.render(req, res, done);
+    }
   }
 };
 
