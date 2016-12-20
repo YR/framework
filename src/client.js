@@ -2,6 +2,7 @@
 
 const application = require('./lib/application');
 const express = require('@yr/express-client');
+const Page = require('./lib/Page');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-client');
 
 /**
@@ -19,3 +20,5 @@ module.exports = function server (id, options) {
 
   return application(id, null, express, options);
 };
+
+module.exports.Page = Page;

@@ -5,6 +5,7 @@ const cacheControl = require('./lib/cacheControl');
 const express = require('@yr/express');
 const http = require('http');
 const https = require('https');
+const Page = require('./lib/Page');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-server');
 
 // Set max socket limit
@@ -37,3 +38,5 @@ module.exports = function server (id, port, options) {
   app.disable('x-powered-by');
   return app;
 };
+
+module.exports.Page = Page;
