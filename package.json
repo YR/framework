@@ -1,7 +1,7 @@
 {
   "name": "@yr/framework",
   "description": "A universal application framework",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "@yr/express": "4.14.0-1",
@@ -39,14 +39,14 @@
     "mocha": "*",
     "supertest": "*"
   },
-  "main": "src/index.js",
+  "main": "src/server.js",
   "repository": "https://github.com/YR/framework.git",
   "license": "MIT",
   "scripts": {
     "prepublish": "buddy build",
     "test": "NODE_ENV=test mocha test/test.js --reporter spec --bail"
   },
-  "browser": "index.js",
+  "browser": "client.js",
   "buddy": {
     "build": [
       {
