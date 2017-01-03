@@ -58,14 +58,17 @@ module.exports = function application (id, port, express, options) {
   // Init pages
   for (const id in pages) {
     const { pageFactory, routes } = pages[id];
-    const page = pageFactory(id, app);
 
-    pages[id] = page;
+    if (routes && routes.length) {
+      const page = pageFactory(id, app);
 
-    routes.forEach((route) => {
-      debug('handling %s at %s', id, route);
-      app.get(route, pageHandlerFactory(page));
-    });
+      pages[id] = page;
+
+      routes.forEach((route) => {
+        debug('handling %s at %s', id, route);
+        app.get(route, pageHandlerFactory(page));
+      });
+    }
   }
 
   // Register post-route middleware stack
