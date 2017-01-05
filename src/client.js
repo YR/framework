@@ -5,6 +5,9 @@ const express = require('@yr/express-client');
 const Page = require('./lib/Page');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-client');
 
+// Patch express.response with cacheControl method (noop)
+express.response.cacheControl = function cacheControl () {};
+
 /**
  * Retrieve and initialise client instance
  * @param {String} id
