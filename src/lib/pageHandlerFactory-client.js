@@ -1,6 +1,17 @@
 'use strict';
 
-const Page = require('./Page');
+const {
+  INITING,
+  INITED,
+  HANDLING,
+  HANDLED,
+  RENDERING,
+  RENDERED,
+  UNRENDERING,
+  UNRENDERED,
+  UNHANDLING,
+  UNHANDLED
+} = require('./Page');
 
 let current = null;
 let pending = null;
@@ -13,6 +24,7 @@ let pending = null;
 module.exports = function pageHandlerFactory (page) {
   return function pageHandler (req, res, next) {
     pending = page;
+    res.write = pageWrite(page, req, res);
     changePage(req, res, (err) => {
       if (err) next(err);
     });
@@ -44,23 +56,23 @@ function changePage (req, res, done) {
   if (currentPage) {
     outstanding++;
     // Unrender before unhandling
-    if (currentPage.containsState(Page.RENDERED)) {
-      currentPage.appendState(Page.UNRENDERING);
+    if (currentPage.containsState(RENDERED)) {
+      currentPage.appendState(UNRENDERING);
       currentPage.unrender(req, res, (err) => {
-        currentPage.appendState(-Page.UNRENDERING, -Page.RENDERED, Page.UNRENDERED);
+        currentPage.appendState(-UNRENDERING, -RENDERED, UNRENDERED);
         if (err) return done(err);
-        currentPage.appendState(Page.UNHANDLING);
+        currentPage.appendState(UNHANDLING);
         currentPage.unhandle(req, res, (err) => {
-          currentPage.appendState(-Page.UNHANDLING, -Page.HANDLED, Page.UNHANDLED);
+          currentPage.appendState(-UNHANDLING, -HANDLED, UNHANDLED);
           if (err) return done(err);
           if (--outstanding <= 0) setPage(req, res, done);
         });
       });
     // Not rendered yet, so only unhandle
     } else {
-      currentPage.appendState(Page.UNHANDLING);
+      currentPage.appendState(UNHANDLING);
       currentPage.unhandle(req, res, (err) => {
-        currentPage.appendState(-Page.UNHANDLING, -Page.HANDLED, Page.UNHANDLED);
+        currentPage.appendState(-UNHANDLING, -HANDLED, UNHANDLED);
         if (err) return done(err);
         if (--outstanding <= 0) setPage(req, res, done);
       });
@@ -68,9 +80,9 @@ function changePage (req, res, done) {
   }
 
   pendingPage.state = 0;
-  pendingPage.appendState(Page.INITING);
+  pendingPage.appendState(INITING);
   pendingPage.init((err) => {
-    pendingPage.appendState(-Page.INITING, Page.INITED);
+    pendingPage.appendState(-INITING, INITED);
     // Protect against possible reassignment to new pending page
     if (pendingPage !== pending) return;
     if (err) return done(err);
@@ -87,21 +99,37 @@ function changePage (req, res, done) {
 function setPage (req, res, done) {
   const currentPage = pending;
 
-  if (currentPage.state === Page.INITED) {
+  if (currentPage.state === INITED) {
     current = currentPage;
     pending = null;
     res.app.set('page', currentPage);
-    currentPage.appendState(Page.HANDLING);
+    currentPage.appendState(HANDLING);
     currentPage.handle(req, res, (err) => {
-      currentPage.appendState(-Page.HANDLING);
+      currentPage.appendState(-HANDLING);
       if (err) return done(err);
       // Protect against possible reassignment to new page
-      if (pending || currentPage !== current || currentPage.state !== Page.INITED) return;
-      currentPage.appendState(Page.HANDLED, Page.RENDERING);
+      if (pending || currentPage !== current || currentPage.state !== INITED) return;
+      currentPage.appendState(HANDLED, RENDERING);
       currentPage.render(req, res, (err) => {
-        currentPage.appendState(-Page.RENDERING, Page.RENDERED);
+        currentPage.appendState(-RENDERING, RENDERED);
         done(err);
       });
+    });
+  }
+}
+
+/**
+ * Partial render of 'page'
+ * @param {Page} page
+ * @param {Request} req
+ * @param {Response} res
+ */
+function pageWrite (page, req, res) {
+  // Only relevant during HANDLING phase
+  if (page == current && page.state === INITED | HANDLING) {
+    page.appendState(RENDERING);
+    page.render(req, res, () => {
+      page.appendState(-RENDERING);
     });
   }
 }
