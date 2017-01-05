@@ -128,10 +128,15 @@ module.exports = class Page {
    * @param {Function} done
    */
   rerender (done) {
-    if (runtime.isBrowser) {
+    // Prevent rerender if currently processing
+    if (runtime.isBrowser && this.containsState(STATE.RENDERED)) {
       const { req, res } = this.app.getCurrentContext();
 
-      this.render(req, res, done);
+      this.appendState(-STATE.RENDERED, STATE.RENDERING);
+      this.render(req, res, () => {
+        this.appendState(-STATE.RENDERING, STATE.RENDERED);
+        done();
+      });
     }
   }
 };
