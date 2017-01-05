@@ -33,6 +33,17 @@ module.exports = function application (id, port, express, options) {
   } = options;
   const app = express();
   const debug = Debug(id);
+  const knownKeys = [
+    'locales',
+    'localesDir',
+    'middleware',
+    'pages',
+    'pageHandlerFactory',
+    'renderer',
+    'settings',
+    'templates',
+    'templatesDir'
+  ];
 
   // Load locales
   if (locales && localesDir) locales.load(localesDir);
@@ -51,6 +62,10 @@ module.exports = function application (id, port, express, options) {
   app.set('views', null);
   // Factory
   app.set('renderer', renderer(app));
+  // Store unknown properties
+  for (const key in options) {
+    if (!~knownKeys.indexOf(key)) app.set(key, options[key]);
+  }
 
   // Register pre-route middleware stack
   if (middleware && middleware.pre) middleware.pre(app);
