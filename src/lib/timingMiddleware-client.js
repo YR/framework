@@ -2,10 +2,9 @@
 
 /**
  * Response timing middleware
- * @param {Express} app
  * @returns {Function}
  */
-module.exports = function (app) {
+module.exports = function () {
   return function timingMiddleware (req, res, next) {
     res.time('response');
     res.once('finish', finished, res);

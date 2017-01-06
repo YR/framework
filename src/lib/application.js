@@ -71,7 +71,7 @@ module.exports = function application (id, port, express, options) {
 
   if (coreMiddleware.length) {
     coreMiddleware.forEach((middleware) => {
-      app.use(middleware(app));
+      app.use(middleware);
     });
   }
 

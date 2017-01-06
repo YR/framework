@@ -2,12 +2,10 @@
 
 /**
  * Attach id to request/response
- * @param {Express} app
+ * @param {String} id
  * @returns {Function}
  */
-module.exports = function (app) {
-  const id = app.get('uid');
-
+module.exports = function (id) {
   return function idMiddleware (req, res, next) {
     req.id = res.id = id;
     next();

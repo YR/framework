@@ -1,8 +1,11 @@
 'use strict';
 
 var application = require('./lib/application');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var cacheControl = require('./lib/cacheControl-server');
 var express = require('@yr/express');
+var helmet = require('helmet');
 var http = {};
 var https = {};
 var idMiddleware = require('./lib/idMiddleware-server');
@@ -36,11 +39,13 @@ timing(express.response);
  */
 module.exports = function server(id, port, options) {
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
-  options.coreMiddleware = [timingMiddleware, idMiddleware];
+  options.coreMiddleware = [timingMiddleware(), idMiddleware(), helmet.frameguard(), helmet.hidePoweredBy(), helmet.ieNoOpen(), helmet.noSniff(), helmet.xssFilter({ setOnOldIE: true }), cookieParser(), bodyParser.json(), bodyParser.urlencoded({
+    // Don't parse complex objects
+    extended: false
+  })];
 
   var app = application(id, port, express, options);
 
-  app.disable('x-powered-by');
   return app;
 };
 

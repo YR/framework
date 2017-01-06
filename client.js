@@ -27,7 +27,7 @@ timing(express.response);
 module.exports = function server(id, options) {
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
   options.uid = 'client:' + uuid.v4();
-  options.coreMiddleware = [timingMiddleware, idMiddleware];
+  options.coreMiddleware = [timingMiddleware(), idMiddleware(options.uid)];
 
   return application(id, null, express, options);
 };

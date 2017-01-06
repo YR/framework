@@ -8,10 +8,9 @@ const HOST_NAME = (process.env.NODE_ENV == 'production' && process.env.HOSTNAME)
 
 /**
  * Attach id to request/response
- * @param {Express} app
  * @returns {Function}
  */
-module.exports = function (app) {
+module.exports = function () {
   return function idMiddleware (req, res, next) {
     const id = `${HOST_NAME}:${uuid.v4()}`;
 
