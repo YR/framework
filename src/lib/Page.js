@@ -125,7 +125,7 @@ module.exports = class Page {
 
   /**
    * Rerender
-   * @param {Function} done
+   * @param {Function} [done]
    */
   rerender (done) {
     // Prevent rerender if currently processing
@@ -135,7 +135,7 @@ module.exports = class Page {
       this.appendState(-STATE.RENDERED, STATE.RENDERING);
       this.render(req, res, () => {
         this.appendState(-STATE.RENDERING, STATE.RENDERED);
-        done();
+        if (done) done();
       });
     }
   }

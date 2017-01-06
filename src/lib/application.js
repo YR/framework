@@ -61,7 +61,7 @@ module.exports = function application (id, port, express, options) {
   app.set('view', null);
   app.set('views', null);
   // Factory
-  app.set('renderer', renderer(app));
+  app.set('renderer', renderer && renderer(app));
   // Store unknown properties
   for (const key in options) {
     if (!~knownKeys.indexOf(key)) app.set(key, options[key]);

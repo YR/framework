@@ -6,6 +6,7 @@ const expect = require('expect.js');
 const fooPage = require('./fixtures/pages/foo');
 const Page = require('../src/lib/Page');
 const request = require('supertest');
+const runtime = require('@yr/runtime');
 const server = require('../src/server');
 let app;
 
@@ -166,6 +167,9 @@ describe('framework', function () {
         }
       }
 
+      before(function () {
+        runtime.isBrowser = true;
+      });
       beforeEach(function () {
         called = [];
         app = {
@@ -176,6 +180,9 @@ describe('framework', function () {
           }
         };
         clientPageHandlerFactory.reset();
+      });
+      after(function () {
+        runtime.isBrowser = false;
       });
 
       it('should handle a page request', function (done) {
@@ -297,6 +304,43 @@ describe('framework', function () {
           expect(page1.state).to.equal(Page.INITED | Page.UNHANDLED);
           expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
           expect(app.page).to.equal(page2);
+          done();
+        }, 50);
+      });
+      it('should enable res.write() during handling', function (done) {
+        class P extends BasePage {
+          handle (req, res, done) {
+            res.write();
+            setTimeout(() => {
+              super.handle(req, res, done);
+            }, 20);
+          }
+        }
+
+        const page = new P('1', app);
+        const handler = clientPageHandlerFactory(page);
+
+        handler({}, { app }, done);
+        expect(called).to.eql(['init1', 'render1']);
+        setTimeout(() => {
+          expect(called).to.eql(['init1', 'render1', 'handle1', 'render1']);
+          done();
+        }, 50);
+      });
+      it('should allow for page rerender', function (done) {
+        app.getCurrentContext = () => {
+          return { req, res };
+        };
+        const req = {};
+        const res = { app };
+        const page = new BasePage('1', app);
+        const handler = clientPageHandlerFactory(page);
+
+        handler(req, res, done);
+        expect(called).to.eql(['init1', 'handle1', 'render1']);
+        setTimeout(() => {
+          page.rerender();
+          expect(called).to.eql(['init1', 'handle1', 'render1', 'render1']);
           done();
         }, 50);
       });
