@@ -5,15 +5,19 @@
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "@yr/express": "4.14.0-2",
-    "@yr/express-client": "2.7.x",
+    "@yr/express-client": "2.8.x",
     "@yr/runtime": "2.0.x",
     "debug": "2.3.x",
     "inline-source": "5.1.x",
+    "marky": "1.1.1",
     "ms": "0.7.x",
-    "nunjucks": "3.0.0"
+    "nunjucks": "3.0.0",
+    "on-finished": "2.3.x",
+    "uuid": "3.0.1"
   },
   "devDependencies": {
     "babel-plugin-syntax-trailing-function-commas": "6.20.0",
+    "babel-plugin-transform-async-generator-functions": "6.17.0",
     "babel-plugin-transform-async-to-generator": "6.16.0",
     "babel-plugin-transform-es2015-arrow-functions": "6.8.0",
     "babel-plugin-transform-es2015-block-scoped-functions": "6.8.0",
@@ -34,6 +38,7 @@
     "babel-plugin-transform-es2015-unicode-regex": "6.11.0",
     "babel-plugin-transform-es5-property-mutators": "6.8.0",
     "babel-plugin-transform-exponentiation-operator": "6.8.0",
+    "babel-plugin-transform-object-rest-spread": "6.20.2",
     "buddy": "6.x.x",
     "expect.js": "*",
     "mocha": "*",

@@ -24,7 +24,7 @@ let pending = null;
 module.exports = function pageHandlerFactory (page) {
   return function pageHandler (req, res, next) {
     pending = page;
-    res.write = pageWriteFactory(page, req, res);
+    res.write = resWriteFactory(page, req, res);
     changePage(req, res, (err) => {
       if (err) next(err);
     });
@@ -81,7 +81,9 @@ function changePage (req, res, done) {
 
   pendingPage.state = 0;
   pendingPage.appendState(INITING);
+  res.time('init');
   pendingPage.init((err) => {
+    res.time('init');
     pendingPage.appendState(-INITING, INITED);
     // Protect against possible reassignment to new pending page
     if (pendingPage !== pending) return;
@@ -104,13 +106,17 @@ function setPage (req, res, done) {
     pending = null;
     res.app.set('page', currentPage);
     currentPage.appendState(HANDLING);
+    res.time('handle');
     currentPage.handle(req, res, (err) => {
+      res.time('handle');
       currentPage.appendState(-HANDLING);
       if (err) return done(err);
       // Protect against possible reassignment to new page
       if (pending || currentPage !== current || currentPage.state !== INITED) return;
       currentPage.appendState(HANDLED, RENDERING);
+      res.time('render');
       currentPage.render(req, res, (err) => {
+        res.time('render');
         currentPage.appendState(-RENDERING, RENDERED);
         done(err);
       });
@@ -125,12 +131,14 @@ function setPage (req, res, done) {
  * @param {Response} res
  * @returns {Function}
  */
-function pageWriteFactory (page, req, res) {
+function resWriteFactory (page, req, res) {
   return function write () {
     // Only relevant during HANDLING phase
     if (page == current && page.state === INITED | HANDLING) {
       page.appendState(RENDERING);
+      res.time('write');
       page.render(req, res, () => {
+        res.time('write');
         page.appendState(-RENDERING);
       });
     }

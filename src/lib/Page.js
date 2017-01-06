@@ -133,7 +133,9 @@ module.exports = class Page {
       const { req, res } = this.app.getCurrentContext();
 
       this.appendState(-STATE.RENDERED, STATE.RENDERING);
+      res.time('rerender');
       this.render(req, res, () => {
+        res.time('rerender');
         this.appendState(-STATE.RENDERING, STATE.RENDERED);
         if (done) done();
       });

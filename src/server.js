@@ -1,19 +1,23 @@
 'use strict';
 
 const application = require('./lib/application');
-const cacheControl = require('./lib/cacheControl');
+const cacheControl = require('./lib/cacheControl-server');
 const express = require('@yr/express');
 const http = require('http');
 const https = require('https');
+const idMiddleware = require('./lib/idMiddleware-server');
 const Page = require('./lib/Page');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-server');
+const timing = require('./lib/timing');
+const timingMiddleware = require('./lib/timingMiddleware-server');
 
 // Set max socket limit
 http.globalAgent.maxSockets = Infinity;
 https.globalAgent.maxSockets = Infinity;
 
-// Patch express.response with cacheControl method
+// Patch express.response
 cacheControl(express.response);
+timing(express.response);
 
 /**
  * Retrieve and initialise server instance
@@ -32,6 +36,7 @@ cacheControl(express.response);
  */
 module.exports = function server (id, port, options) {
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
+  options.coreMiddleware = [timingMiddleware, idMiddleware];
 
   const app = application(id, port, express, options);
 

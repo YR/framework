@@ -21,6 +21,7 @@ const Debug = require('debug');
  */
 module.exports = function application (id, port, express, options) {
   const {
+    coreMiddleware = [],
     locales,
     localesDir,
     middleware,
@@ -34,6 +35,7 @@ module.exports = function application (id, port, express, options) {
   const app = express();
   const debug = Debug(id);
   const knownKeys = [
+    'coreMiddleware',
     'locales',
     'localesDir',
     'middleware',
@@ -65,6 +67,12 @@ module.exports = function application (id, port, express, options) {
   // Store unknown properties
   for (const key in options) {
     if (!~knownKeys.indexOf(key)) app.set(key, options[key]);
+  }
+
+  if (coreMiddleware.length) {
+    coreMiddleware.forEach((middleware) => {
+      app.use(middleware(app));
+    });
   }
 
   // Register pre-route middleware stack

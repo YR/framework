@@ -1,14 +1,15 @@
 'use strict';
 
-const cacheControl = require('../src/lib/cacheControl');
+const cacheControl = require('../src/lib/cacheControl-server');
 const clientPageHandlerFactory = require('../src/lib/pageHandlerFactory-client');
 const expect = require('expect.js');
 const fooPage = require('./fixtures/pages/foo');
+const onFinished = require('on-finished');
 const Page = require('../src/lib/Page');
 const request = require('supertest');
 const runtime = require('@yr/runtime');
 const server = require('../src/server');
-let app;
+let app, req, res;
 
 describe('framework', function () {
   afterEach(function (done) {
@@ -133,6 +134,78 @@ describe('framework', function () {
           done();
         });
     });
+    it('should generate response id', function (done) {
+      const pageFactory = function (id, app) {
+        return new Page(id, app);
+      };
+
+      app = server('foo', 8080, {
+        middleware: {
+          pre (app) {
+            app.use((req, res, next) => {
+              expect(res).to.have.property('id');
+              expect(res.id).to.match(/dev:{36}/);
+              next();
+            });
+          }
+        },
+        pages: {
+          foo: { pageFactory, routes: ['/foo'] }
+        }
+      });
+      request(app)
+        .get('/foo')
+        .end((err, res) => {
+          if (err) return done(err);
+          done();
+        });
+    });
+    it('should generate response timings', function (done) {
+      class P extends Page {
+        handle (req, res, done) {
+          res.write('f');
+          res.write('o');
+          res.write('o');
+          setTimeout(() => {
+            super.handle(req, res, done);
+          }, 50);
+        }
+        render (req, res, done) {
+          setTimeout(() => {
+            super.render(req, res, done);
+          }, 50);
+        }
+      }
+      const pageFactory = function (id, app) {
+        return new P(id, app);
+      };
+
+      app = server('foo', 8080, {
+        middleware: {
+          pre (app) {
+            app.use((req, res, next) => {
+              onFinished(res, (err, res) => {
+                expect(res.timings).to.have.property('handle');
+                expect(res.timings).to.have.property('render');
+                expect(res.timings).to.have.property('response');
+              });
+              next();
+            });
+          }
+        },
+        pages: {
+          foo: { pageFactory, routes: ['/foo'] }
+        }
+      });
+      request(app)
+        .get('/foo')
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res.text).to.equal('foo');
+          done();
+        });
+
+    });
   });
 
   describe('client application', function () {
@@ -172,12 +245,17 @@ describe('framework', function () {
       });
       beforeEach(function () {
         called = [];
+        req = {};
         app = {
           page: null,
           get (key) { },
           set (key, value) {
             this.page = value;
           }
+        };
+        res = {
+          app,
+          time () {}
         };
         clientPageHandlerFactory.reset();
       });
@@ -186,17 +264,14 @@ describe('framework', function () {
       });
 
       it('should handle a page request', function (done) {
-        app = {
-          get (key) {},
-          set (key, value) {
-            expect(key).to.equal('page');
-            expect(value).to.equal(page);
-          }
+        app.set = function (key, value) {
+          expect(key).to.equal('page');
+          expect(value).to.equal(page);
         };
         const page = new BasePage('1', app);
         const handler = clientPageHandlerFactory(page);
 
-        handler({}, { app }, done);
+        handler(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1']);
         expect(page.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
         done();
@@ -207,9 +282,9 @@ describe('framework', function () {
         const handler1 = clientPageHandlerFactory(page1);
         const handler2 = clientPageHandlerFactory(page2);
 
-        handler1({}, { app }, done);
+        handler1(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1']);
-        handler2({}, { app }, done);
+        handler2(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1', 'init2', 'handle2', 'render2']);
         expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
         expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
@@ -236,8 +311,8 @@ describe('framework', function () {
         const handler1 = clientPageHandlerFactory(page1);
         const handler2 = clientPageHandlerFactory(page2);
 
-        handler1({}, { app }, done);
-        handler2({}, { app }, done);
+        handler1(req, res, done);
+        handler2(req, res, done);
         setTimeout(() => {
           expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'init2', 'unhandle1', 'handle2', 'render2']);
           expect(app.page).to.equal(page2);
@@ -262,9 +337,9 @@ describe('framework', function () {
         const handler2 = clientPageHandlerFactory(page2);
         const handler3 = clientPageHandlerFactory(page3);
 
-        handler1({}, { app }, done);
-        handler2({}, { app }, done);
-        handler3({}, { app }, done);
+        handler1(req, res, done);
+        handler2(req, res, done);
+        handler3(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1']);
         setTimeout(() => {
           expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1', 'init2', 'init3', 'handle3', 'render3']);
@@ -296,8 +371,8 @@ describe('framework', function () {
         const handler1 = clientPageHandlerFactory(page1);
         const handler2 = clientPageHandlerFactory(page2);
 
-        handler1({}, { app }, done);
-        handler2({}, { app }, done);
+        handler1(req, res, done);
+        handler2(req, res, done);
         expect(called).to.eql(['init1', 'unhandle1']);
         setTimeout(() => {
           expect(called).to.eql(['init1', 'unhandle1', 'init2', 'handle2', 'render2', 'handle1']);
@@ -320,7 +395,7 @@ describe('framework', function () {
         const page = new P('1', app);
         const handler = clientPageHandlerFactory(page);
 
-        handler({}, { app }, done);
+        handler(req, res, done);
         expect(called).to.eql(['init1', 'render1']);
         setTimeout(() => {
           expect(called).to.eql(['init1', 'render1', 'handle1', 'render1']);
@@ -331,8 +406,6 @@ describe('framework', function () {
         app.getCurrentContext = () => {
           return { req, res };
         };
-        const req = {};
-        const res = { app };
         const page = new BasePage('1', app);
         const handler = clientPageHandlerFactory(page);
 
