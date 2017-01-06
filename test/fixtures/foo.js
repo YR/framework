@@ -1,6 +1,6 @@
 'use strict';
 
-const Page = require('../../../../src/lib/Page');
+const Page = require('../../src/lib/Page');
 
 module.exports = function create (id, app) {
   return new FooPage(id, app);
