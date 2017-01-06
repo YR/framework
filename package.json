@@ -4,8 +4,8 @@
   "version": "1.0.2",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
-    "@yr/express": "4.14.0-1",
-    "@yr/express-client": "2.6.x",
+    "@yr/express": "4.14.0-2",
+    "@yr/express-client": "2.7.x",
     "@yr/runtime": "2.0.x",
     "debug": "2.3.x",
     "inline-source": "5.1.x",
