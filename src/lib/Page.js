@@ -29,6 +29,7 @@ module.exports = class Page {
     this.app = app;
     this.id = id;
     this.state = 0;
+    this.initialised = false;
 
     const { config, localesDir, templatesDir } = options;
     const locales = app.get('locales');
@@ -80,6 +81,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   init (done) {
+    this.initialised = true;
     if (done) done();
   }
 
