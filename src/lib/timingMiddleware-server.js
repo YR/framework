@@ -11,6 +11,7 @@ module.exports = function () {
     res.time('response');
     onFinished(res, (err, res) => {
       res.time('response');
+      // console.log(res.timings)
     });
     next();
   };
