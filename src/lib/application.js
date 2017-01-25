@@ -2,6 +2,13 @@
 
 const Debug = require('debug');
 
+const BLACKLIST_KEYS = [
+  'middleware',
+  'pageHandlerFactory',
+  'renderer',
+  'sourcepath'
+];
+
 /**
  * Retrieve and initialise server instance
  * @param {String} id
@@ -9,76 +16,40 @@ const Debug = require('debug');
  * @param {Express} express
  * @param {Object} options
  *  - {Object} locales
- *  - {String} localesDir
  *  - {Object} middleware
  *  - {Object} pages
  *  - {Function} pageHandlerFactory
  *  - {Function} renderer
- *  - {String} rootpath
  *  - {DataStore} settings
+ *  - {String} sourcepath
  *  - {Object} templates
- *  - {String} templatesDir
  * @returns {Express}
  */
 module.exports = function application (id, port, express, options) {
   const {
-    coreMiddleware = [],
-    locales,
-    localesDir,
     middleware,
     pages = {},
     pageHandlerFactory,
-    renderer,
-    rootpath,
-    settings,
-    templates,
-    templatesDir
+    renderer
   } = options;
   const app = express();
   const debug = Debug(id);
-  const knownKeys = [
-    'coreMiddleware',
-    'locales',
-    'localesDir',
-    'middleware',
-    'pages',
-    'pageHandlerFactory',
-    'renderer',
-    'settings',
-    'templates',
-    'templatesDir'
-  ];
-
-  // Load locales
-  if (locales && localesDir) locales.load(localesDir, { rootpath });
-  // Load templates
-  if (templates && templatesDir) templates.load(templatesDir, { rootpath });
 
   // Store properties
   app.set('debug', debug);
   app.set('id', id);
-  app.set('locales', locales);
   app.set('page', null);
-  app.set('pages', pages);
-  app.set('settings', settings);
-  app.set('templates', templates);
   app.set('view', null);
   app.set('views', null);
   // Factory
   app.set('renderer', renderer && renderer(app));
-  // Store unknown properties
+  // Store options
   for (const key in options) {
-    if (!~knownKeys.indexOf(key)) app.set(key, options[key]);
+    if (!~BLACKLIST_KEYS.indexOf(key)) app.set(key, options[key]);
   }
 
-  if (coreMiddleware.length) {
-    coreMiddleware.forEach((middleware) => {
-      app.use(middleware);
-    });
-  }
-
-  // Register pre-route middleware stack
-  if (middleware && middleware.pre) middleware.pre(app);
+  // Register middleware stack
+  if (middleware && middleware.register) middleware.register(app);
 
   // Init pages
   for (const id in pages) {
@@ -96,8 +67,8 @@ module.exports = function application (id, port, express, options) {
     }
   }
 
-  // Register post-route middleware stack
-  if (middleware && middleware.post) middleware.post(app);
+  // Register error middleware stack
+  if (middleware && middleware.registerError) middleware.registerError(app);
 
   app.set('server', app.listen(port));
   debug(port ? `listening on: ${port}` : 'listening');

@@ -20,29 +20,12 @@ module.exports = class Page {
    * Page constructor
    * @param {String} id
    * @param {Express} app
-   * @param {Object} options
-   *  - {Object} config
-   *  - {String} localesDir
-   *  - {String} rootpath
-   *  - {String} templatesDir
    */
-  constructor (id, app, options = {}) {
+  constructor (id, app) {
     this.app = app;
     this.id = id;
     this.state = 0;
     this.initialised = false;
-
-    const { config, localesDir, rootpath, templatesDir } = options;
-    const locales = app.get('locales');
-    const settings = app.get('settings');
-    const templates = app.get('templates');
-
-    // Store page specific settings
-    if (settings && config) settings.set(id, config);
-    // Load page specific locale data
-    if (locales && localesDir) locales.load(localesDir, { rootpath });
-    // Load page specific templates
-    if (templates && templatesDir) templates.load(templatesDir, { rootpath });
   }
 
   /**

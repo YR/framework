@@ -1,18 +1,16 @@
 'use strict';
 
 const application = require('./lib/application');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const cacheControl = require('./lib/cacheControl-server');
 const express = require('@yr/express');
-const helmet = require('helmet');
+const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const idMiddleware = require('./lib/idMiddleware-server');
+const middleware = require('./lib/middleware-server');
 const Page = require('./lib/Page');
+const path = require('path');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-server');
 const timing = require('./lib/timing');
-const timingMiddleware = require('./lib/timingMiddleware-server');
 
 // Set max socket limit
 http.globalAgent.maxSockets = Infinity;
@@ -27,33 +25,28 @@ timing(express.response);
  * @param {String} id
  * @param {Number} port
  * @param {Object} options
+ *  - {String} apppath
  *  - {Object} locales
- *  - {String} localesDir
  *  - {Object} middleware
  *  - {Object} pages
  *  - {Object} renderer
  *  - {DataStore} settings
+ *  - {String} sourcepath
  *  - {Object} templates
- *  - {String} templatesDir
  * @returns {Express}
  */
 module.exports = function server (id, port, options) {
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
-  options.coreMiddleware = [
-    timingMiddleware(),
-    idMiddleware(),
-    helmet.frameguard(),
-    helmet.hidePoweredBy(),
-    helmet.ieNoOpen(),
-    helmet.noSniff(),
-    helmet.xssFilter({ setOnOldIE: true }),
-    cookieParser(),
-    bodyParser.json(),
-    bodyParser.urlencoded({
-      // Don't parse complex objects
-      extended: false
-    })
-  ];
+  if (options.middleware && options.middleware.register) {
+    options.middleware.register = function (app) {
+      middleware.register(app);
+      options.middleware.register(app);
+    };
+  } else {
+    options.middleware = middleware;
+  }
+
+  load(options);
 
   const app = application(id, port, express, options);
 
@@ -63,3 +56,24 @@ module.exports = function server (id, port, options) {
 module.exports.Page = Page;
 module.exports.static = express.static;
 module.exports.query = express.query;
+
+/**
+ * Load locales/templates for app and pages
+ * @param {Object} options
+ */
+function load (options) {
+  const { apppath, locales, pages, settings, sourcepath, templates } = options;
+
+  [apppath, ...Object.keys(pages).map((page) => page.pagepath)]
+    .forEach((p) => {
+      const id = path.basename(p);
+      const configpath = path.join(p, 'config.js');
+      const localespath = path.join(p, 'locales');
+      const templatespath = path.join(p, 'templates');
+
+      if (fs.existsSync(localespath)) locales.load(localespath);
+      if (fs.existsSync(templatespath)) templates.load(templatespath, { rootpath: sourcepath });
+      // App config is 'settings', so ignore
+      if (p != apppath && fs.existsSync(configpath)) settings.set(id, require(configpath));
+    });
+}
