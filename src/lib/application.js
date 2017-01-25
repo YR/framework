@@ -14,6 +14,7 @@ const Debug = require('debug');
  *  - {Object} pages
  *  - {Function} pageHandlerFactory
  *  - {Function} renderer
+ *  - {String} rootpath
  *  - {DataStore} settings
  *  - {Object} templates
  *  - {String} templatesDir
@@ -28,6 +29,7 @@ module.exports = function application (id, port, express, options) {
     pages = {},
     pageHandlerFactory,
     renderer,
+    rootpath,
     settings,
     templates,
     templatesDir
@@ -48,9 +50,9 @@ module.exports = function application (id, port, express, options) {
   ];
 
   // Load locales
-  if (locales && localesDir) locales.load(localesDir);
+  if (locales && localesDir) locales.load(localesDir, { rootpath });
   // Load templates
-  if (templates && templatesDir) templates.load(templatesDir);
+  if (templates && templatesDir) templates.load(templatesDir, { rootpath });
 
   // Store properties
   app.set('debug', debug);

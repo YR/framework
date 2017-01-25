@@ -23,6 +23,7 @@ module.exports = class Page {
    * @param {Object} options
    *  - {Object} config
    *  - {String} localesDir
+   *  - {String} rootpath
    *  - {String} templatesDir
    */
   constructor (id, app, options = {}) {
@@ -31,7 +32,7 @@ module.exports = class Page {
     this.state = 0;
     this.initialised = false;
 
-    const { config, localesDir, templatesDir } = options;
+    const { config, localesDir, rootpath, templatesDir } = options;
     const locales = app.get('locales');
     const settings = app.get('settings');
     const templates = app.get('templates');
@@ -39,9 +40,9 @@ module.exports = class Page {
     // Store page specific settings
     if (settings && config) settings.set(id, config);
     // Load page specific locale data
-    if (locales && localesDir) locales.load(localesDir);
+    if (locales && localesDir) locales.load(localesDir, { rootpath });
     // Load page specific templates
-    if (templates && templatesDir) templates.load(templatesDir);
+    if (templates && templatesDir) templates.load(templatesDir, { rootpath });
   }
 
   /**

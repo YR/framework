@@ -50,3 +50,5 @@ module.exports = function server(id, port, options) {
 };
 
 module.exports.Page = Page;
+module.exports.static = exports.static;
+module.exports.query = exports.query;

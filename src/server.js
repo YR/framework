@@ -61,3 +61,5 @@ module.exports = function server (id, port, options) {
 };
 
 module.exports.Page = Page;
+module.exports.static = express.static;
+module.exports.query = express.query;
