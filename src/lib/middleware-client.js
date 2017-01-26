@@ -1,7 +1,7 @@
 'use strict';
 
-const idMiddleware = require('./lib/idMiddleware-client');
-const timingMiddleware = require('./lib/timingMiddleware-client');
+const idMiddleware = require('./idMiddleware-client');
+const timingMiddleware = require('./timingMiddleware-client');
 
 module.exports = {
   /**
@@ -9,7 +9,7 @@ module.exports = {
    * @param {Express} app
    */
   register (app) {
-    timingMiddleware()(app);
-    idMiddleware(app.get('uid'))(app);
+    app.use(timingMiddleware());
+    app.use(idMiddleware(app.get('uid')));
   }
 };

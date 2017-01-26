@@ -12,6 +12,8 @@ const path = require('path');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-server');
 const timing = require('./lib/timing');
 
+const DEFAULT_PORT = 3000;
+
 // Set max socket limit
 http.globalAgent.maxSockets = Infinity;
 https.globalAgent.maxSockets = Infinity;
@@ -23,30 +25,31 @@ timing(express.response);
 /**
  * Retrieve and initialise server instance
  * @param {String} id
- * @param {Number} port
- * @param {Object} options
- *  - {String} apppath
+ * @param {Number} [port]
+ * @param {String} [dir]
+ * @param {Object} [options]
  *  - {Object} locales
  *  - {Object} middleware
  *  - {Object} pages
  *  - {Object} renderer
  *  - {DataStore} settings
- *  - {String} sourcepath
  *  - {Object} templates
  * @returns {Express}
  */
-module.exports = function server (id, port, options) {
+module.exports = function server (id, port = DEFAULT_PORT, dir = process.cwd(), options = {}) {
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
   if (options.middleware && options.middleware.register) {
+    const register = options.middleware.register;
+
     options.middleware.register = function (app) {
       middleware.register(app);
-      options.middleware.register(app);
+      register(app);
     };
   } else {
     options.middleware = middleware;
   }
 
-  load(options);
+  load(dir, options);
 
   const app = application(id, port, express, options);
 
@@ -59,21 +62,22 @@ module.exports.query = express.query;
 
 /**
  * Load locales/templates for app and pages
+ * @param {String} dir
  * @param {Object} options
  */
-function load (options) {
-  const { apppath, locales, pages, settings, sourcepath, templates } = options;
+function load (dir, options) {
+  const { locales, pages = {}, settings, templates } = options;
 
-  [apppath, ...Object.keys(pages).map((page) => page.pagepath)]
-    .forEach((p) => {
-      const id = path.basename(p);
-      const configpath = path.join(p, 'config.js');
-      const localespath = path.join(p, 'locales');
-      const templatespath = path.join(p, 'templates');
+  [dir, ...Object.keys(pages).map((id) => pages[id].dir)]
+    .forEach((dirpath) => {
+      const id = path.basename(dirpath);
+      const configpath = path.join(dirpath, 'config.js');
+      const localespath = path.join(dirpath, 'locales');
+      const templatespath = path.join(dirpath, 'templates');
 
       if (fs.existsSync(localespath)) locales.load(localespath);
-      if (fs.existsSync(templatespath)) templates.load(templatespath, { rootpath: sourcepath });
+      if (fs.existsSync(templatespath)) templates.load(templatespath);
       // App config is 'settings', so ignore
-      if (p != apppath && fs.existsSync(configpath)) settings.set(id, require(configpath));
+      if (dirpath != dir && fs.existsSync(configpath)) settings.set(id, require(configpath));
     });
 }

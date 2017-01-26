@@ -3,8 +3,8 @@
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
-const idMiddleware = require('./lib/idMiddleware-server');
-const timingMiddleware = require('./lib/timingMiddleware-server');
+const idMiddleware = require('./idMiddleware-server');
+const timingMiddleware = require('./timingMiddleware-server');
 
 module.exports = {
   /**
@@ -12,18 +12,18 @@ module.exports = {
    * @param {Express} app
    */
   register (app) {
-    timingMiddleware()(app);
-    idMiddleware()(app);
-    helmet.frameguard()(app);
-    helmet.hidePoweredBy()(app);
-    helmet.ieNoOpen()(app);
-    helmet.noSniff()(app);
-    helmet.xssFilter({ setOnOldIE: true })(app);
-    cookieParser()(app);
-    bodyParser.json()(app);
-    bodyParser.urlencoded({
+    app.use(timingMiddleware());
+    app.use(idMiddleware());
+    app.use(helmet.frameguard());
+    app.use(helmet.hidePoweredBy());
+    app.use(helmet.ieNoOpen());
+    app.use(helmet.noSniff());
+    app.use(helmet.xssFilter({ setOnOldIE: true }));
+    app.use(cookieParser());
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({
       // Don't parse complex objects
       extended: false
-    })(app);
+    }));
   }
 };

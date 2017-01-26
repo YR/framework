@@ -104,26 +104,26 @@ describe('framework', function () {
 
   describe('server application', function () {
     it('should initialize an app instance', function () {
-      app = server('foo', 8080, {});
+      app = server('foo');
       expect(app).to.have.property('get');
     });
     it('should define settings on the app instance', function () {
-      app = server('foo', 8080, {});
+      app = server('foo');
       expect(app.get('id')).to.equal('foo');
     });
     it('should initialize a page', function () {
-      app = server('foo', 8080, {
+      app = server('bar', 8080, 'bar', {
         pages: {
-          foo: { pageFactory: fooPage, routes: ['/foo'] }
+          foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
         }
       });
       expect(app.get('pages')).to.have.property('foo');
       expect(app.get('pages').foo).to.have.property('id', 'foo');
     });
     it('should handle a matching route', function (done) {
-      app = server('foo', 8080, {
+      app = server('bar', 8080, 'bar', {
         pages: {
-          foo: { pageFactory: fooPage, routes: ['/foo'] }
+          foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
         }
       });
       request(app)
@@ -139,9 +139,9 @@ describe('framework', function () {
         return new Page(id, app);
       };
 
-      app = server('foo', 8080, {
+      app = server('bar', 8080, 'bar', {
         middleware: {
-          pre (app) {
+          register (app) {
             app.use((req, res, next) => {
               expect(res).to.have.property('id');
               expect(res.id).to.match(/dev:{36}/);
@@ -150,7 +150,7 @@ describe('framework', function () {
           }
         },
         pages: {
-          foo: { pageFactory, routes: ['/foo'] }
+          foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
         }
       });
       request(app)
@@ -180,9 +180,9 @@ describe('framework', function () {
         return new P(id, app);
       };
 
-      app = server('foo', 8080, {
+      app = server('bar', 8080, 'bar', {
         middleware: {
-          pre (app) {
+          register (app) {
             app.use((req, res, next) => {
               onFinished(res, (err, res) => {
                 expect(res.timings).to.have.property('handle');
@@ -194,7 +194,7 @@ describe('framework', function () {
           }
         },
         pages: {
-          foo: { pageFactory, routes: ['/foo'] }
+          foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
         }
       });
       request(app)

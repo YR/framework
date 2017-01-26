@@ -26,9 +26,11 @@ timing(express.response);
 module.exports = function server (id, options) {
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
   if (options.middleware && options.middleware.register) {
+    const register = options.middleware.register;
+
     options.middleware.register = function (app) {
       middleware.register(app);
-      options.middleware.register(app);
+      register(app);
     };
   } else {
     options.middleware = middleware;
