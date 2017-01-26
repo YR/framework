@@ -35,7 +35,10 @@ module.exports = function application (id, port, express, options) {
   const app = express();
   const debug = Debug(id);
 
-  // Store properties
+  // Store options
+  for (const key in options) {
+    if (!~BLACKLIST_KEYS.indexOf(key)) app.set(key, options[key]);
+  }
   app.set('debug', debug);
   app.set('id', id);
   app.set('page', null);
@@ -43,10 +46,6 @@ module.exports = function application (id, port, express, options) {
   app.set('views', null);
   // Factory
   app.set('renderer', renderer && renderer(app));
-  // Store options
-  for (const key in options) {
-    if (!~BLACKLIST_KEYS.indexOf(key)) app.set(key, options[key]);
-  }
 
   // Register middleware stack
   if (middleware && middleware.register) middleware.register(app);
