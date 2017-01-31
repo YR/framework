@@ -1,6 +1,7 @@
 'use strict';
 
-const cacheControl = require('../src/lib/cacheControl-server');
+const cacheControlClient = require('../src/lib/cacheControl-client');
+const cacheControlServer = require('../src/lib/cacheControl-server');
 const clientPageHandlerFactory = require('../src/lib/pageHandlerFactory-client');
 const expect = require('expect.js');
 const fooPage = require('./fixtures/foo');
@@ -25,190 +26,214 @@ describe('framework', function () {
     }
   });
 
-  describe('cacheControl', function () {
-    beforeEach(function () {
-      this.res = {
-        set: function (key, value) {
-          this[key] = value;
-        }
-      };
-      cacheControl(this.res);
-    });
-
-    it('should set no-cache when passed "false"', function () {
-      this.res.cacheControl(false);
-      expect(this.res['Cache-Control']).to.eql('private, no-cache');
-    });
-    it('should set no-cache when passed "0"', function () {
-      this.res.cacheControl(0);
-      expect(this.res['Cache-Control']).to.eql('private, no-cache');
-    });
-    it('should convert a maxage value passed as String', function () {
-      this.res.cacheControl('1hr');
-      expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
-    });
-    it('should add a maxage value passed as Number', function () {
-      this.res.cacheControl(3600);
-      expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
-    });
-    it('should pass through cache value from upstream header', function () {
-      const upstream = {
-        ['cache-control']: 'public, max-age=360'
-      };
-
-      this.res.cacheControl('1hr', upstream);
-      expect(this.res['Cache-Control']).to.eql('public, max-age=360');
-    });
-    it('should pass through shortest cache value from multiple upstream headers', function () {
-      const upstream = [
-        { ['cache-control']: 'public, max-age=360' },
-        { ['cache-control']: 'public, max-age=350' }
-      ];
-
-      this.res.cacheControl('1hr', upstream);
-      expect(this.res['Cache-Control']).to.eql('public, max-age=350');
-    });
-    it('should fall back to passed maxage when upstream header does not contain "cache-control"', function () {
-      const upstream = {};
-
-      this.res.cacheControl('1hr', upstream);
-      expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
-    });
-    it('should fall back to passed maxage when multiple upstream headers do not contain "cache-control"', function () {
-      const upstream = [{ }, { }];
-
-      this.res.cacheControl('1hr', upstream);
-      expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
-    });
-    it('should throw when passed an invalid value', function () {
-      try {
-        this.res.cacheControl(true);
-        expect.fail();
-      } catch (err) {
-        expect(err).to.be.an(Error);
-      }
-      try {
-        this.res.cacheControl('');
-        expect.fail();
-      } catch (err) {
-        expect(err).to.be.an(Error);
-      }
-      try {
-        this.res.cacheControl('foo');
-        expect.fail();
-      } catch (err) {
-        expect(err).to.be.an(Error);
-      }
-    });
-  });
-
-  describe('server application', function () {
-    it('should initialize an app instance', function () {
-      app = server('foo');
-      expect(app).to.have.property('get');
-    });
-    it('should define settings on the app instance', function () {
-      app = server('foo');
-      expect(app.get('id')).to.equal('foo');
-    });
-    it('should initialize a page', function () {
-      app = server('bar', 8080, 'bar', {
-        pages: {
-          foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
-        }
-      });
-      expect(app.get('pages')).to.have.property('foo');
-      expect(app.get('pages').foo).to.have.property('id', 'foo');
-    });
-    it('should handle a matching route', function (done) {
-      app = server('bar', 8080, 'bar', {
-        pages: {
-          foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
-        }
-      });
-      request(app)
-        .get('/foo')
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.text).to.equal('foo');
-          done();
-        });
-    });
-    it('should generate response id', function (done) {
-      const pageFactory = function (id, app) {
-        return new Page(id, app);
-      };
-
-      app = server('bar', 8080, 'bar', {
-        middleware: {
-          register (app) {
-            app.use((req, res, next) => {
-              expect(res).to.have.property('id');
-              expect(res.id).to.match(/dev:{36}/);
-              next();
-            });
+  describe('server', function () {
+    describe('cacheControl', function () {
+      beforeEach(function () {
+        this.res = {
+          set: function (key, value) {
+            this[key] = value;
           }
-        },
-        pages: {
-          foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
+        };
+        cacheControlServer(this.res);
+      });
+
+      it('should set no-cache when passed "false"', function () {
+        this.res.cacheControl(false);
+        expect(this.res['Cache-Control']).to.eql('private, no-cache');
+      });
+      it('should set no-cache when passed "0"', function () {
+        this.res.cacheControl(0);
+        expect(this.res['Cache-Control']).to.eql('private, no-cache');
+      });
+      it('should pass through a valid header string', function () {
+        this.res.cacheControl('public, max-age=1000');
+        expect(this.res['Cache-Control']).to.eql('public, max-age=1000');
+      });
+      it('should convert a maxage value passed as String', function () {
+        this.res.cacheControl('1hr');
+        expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
+      });
+      it('should add a maxage value passed as Number', function () {
+        this.res.cacheControl(3600);
+        expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
+      });
+      it('should pass through cache value from header object', function () {
+        const upstream = {
+          ['cache-control']: 'public, max-age=360'
+        };
+
+        this.res.cacheControl('1hr', upstream);
+        expect(this.res['Cache-Control']).to.eql('public, max-age=360');
+      });
+      it('should pass through cache value from object with "headers"', function () {
+        const value = {
+          headers: {
+            ['cache-control']: 'public, max-age=360'
+          }
+        };
+
+        this.res.cacheControl('1hr', value);
+        expect(this.res['Cache-Control']).to.eql('public, max-age=360');
+      });
+      it('should pass through shortest cache value from array of header objects', function () {
+        const upstream = [
+          { ['cache-control']: 'public, max-age=360' },
+          { ['cache-control']: 'public, max-age=350' }
+        ];
+
+        this.res.cacheControl('1hr', upstream);
+        expect(this.res['Cache-Control']).to.eql('public, max-age=350');
+      });
+      it('should pass through shortest cache value from array of objects with "headers"', function () {
+        const upstream = [
+          { headers: { ['cache-control']: 'public, max-age=360' } },
+          { headers: { ['cache-control']: 'public, max-age=350' } }
+        ];
+
+        this.res.cacheControl('1hr', upstream);
+        expect(this.res['Cache-Control']).to.eql('public, max-age=350');
+      });
+      it('should fall back to passed maxage when passed header object does not contain "cache-control"', function () {
+        const upstream = {};
+
+        this.res.cacheControl('1hr', upstream);
+        expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
+      });
+      it('should fall back to passed maxage when array of header objects do not contain "cache-control"', function () {
+        const upstream = [{ }, { }];
+
+        this.res.cacheControl('1hr', upstream);
+        expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
+      });
+      it('should throw when passed an invalid value', function () {
+        try {
+          this.res.cacheControl(true);
+          expect.fail();
+        } catch (err) {
+          expect(err).to.be.an(Error);
+        }
+        try {
+          this.res.cacheControl('');
+          expect.fail();
+        } catch (err) {
+          expect(err).to.be.an(Error);
+        }
+        try {
+          this.res.cacheControl('foo');
+          expect.fail();
+        } catch (err) {
+          expect(err).to.be.an(Error);
         }
       });
-      request(app)
-        .get('/foo')
-        .end((err, res) => {
-          if (err) return done(err);
-          done();
-        });
     });
-    it('should generate response timings', function (done) {
-      class P extends Page {
-        handle (req, res, done) {
-          res.write('f');
-          res.write('o');
-          res.write('o');
-          setTimeout(() => {
-            super.handle(req, res, done);
-          }, 50);
-        }
-        render (req, res, done) {
-          setTimeout(() => {
-            super.render(req, res, done);
-          }, 50);
-        }
-      }
-      const pageFactory = function (id, app) {
-        return new P(id, app);
-      };
 
-      app = server('bar', 8080, 'bar', {
-        middleware: {
-          register (app) {
-            app.use((req, res, next) => {
-              onFinished(res, (err, res) => {
-                expect(res.timings).to.have.property('handle');
-                expect(res.timings).to.have.property('render');
-                expect(res.timings).to.have.property('response');
+    describe('application', function () {
+      it('should initialize an app instance', function () {
+        app = server('foo');
+        expect(app).to.have.property('get');
+      });
+      it('should define settings on the app instance', function () {
+        app = server('foo');
+        expect(app.get('id')).to.equal('foo');
+      });
+      it('should initialize a page', function () {
+        app = server('bar', 8080, 'bar', {
+          pages: {
+            foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
+          }
+        });
+        expect(app.get('pages')).to.have.property('foo');
+        expect(app.get('pages').foo).to.have.property('id', 'foo');
+      });
+      it('should handle a matching route', function (done) {
+        app = server('bar', 8080, 'bar', {
+          pages: {
+            foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
+          }
+        });
+        request(app)
+          .get('/foo')
+          .end((err, res) => {
+            if (err) return done(err);
+            expect(res.text).to.equal('foo');
+            done();
+          });
+      });
+      it('should generate response id', function (done) {
+        const pageFactory = function (id, app) {
+          return new Page(id, app);
+        };
+
+        app = server('bar', 8080, 'bar', {
+          middleware: {
+            register (app) {
+              app.use((req, res, next) => {
+                expect(res).to.have.property('id');
+                expect(res.id).to.match(/dev:{36}/);
+                next();
               });
-              next();
-            });
+            }
+          },
+          pages: {
+            foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
           }
-        },
-        pages: {
-          foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
-        }
-      });
-      request(app)
-        .get('/foo')
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.text).to.equal('foo');
-          done();
         });
+        request(app)
+          .get('/foo')
+          .end((err, res) => {
+            if (err) return done(err);
+            done();
+          });
+      });
+      it('should generate response timings', function (done) {
+        class P extends Page {
+          handle (req, res, done) {
+            res.write('f');
+            res.write('o');
+            res.write('o');
+            setTimeout(() => {
+              super.handle(req, res, done);
+            }, 50);
+          }
+          render (req, res, done) {
+            setTimeout(() => {
+              super.render(req, res, done);
+            }, 50);
+          }
+        }
+        const pageFactory = function (id, app) {
+          return new P(id, app);
+        };
 
+        app = server('bar', 8080, 'bar', {
+          middleware: {
+            register (app) {
+              app.use((req, res, next) => {
+                onFinished(res, (err, res) => {
+                  expect(res.timings).to.have.property('handle');
+                  expect(res.timings).to.have.property('render');
+                  expect(res.timings).to.have.property('response');
+                });
+                next();
+              });
+            }
+          },
+          pages: {
+            foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
+          }
+        });
+        request(app)
+          .get('/foo')
+          .end((err, res) => {
+            if (err) return done(err);
+            expect(res.text).to.equal('foo');
+            done();
+          });
+      });
     });
   });
 
-  describe('client application', function () {
+  describe('client', function () {
     describe('pageHandler', function () {
       let called;
 
@@ -416,6 +441,42 @@ describe('framework', function () {
           expect(called).to.eql(['init1', 'handle1', 'render1', 'render1']);
           done();
         }, 50);
+      });
+    });
+
+    describe('cacheControl', function () {
+      beforeEach(function () {
+        this.res = {
+          app: {
+            refreshed: false,
+            refresh: function () {
+              this.refreshed = true;
+            }
+          }
+        };
+        cacheControlClient(this.res);
+      });
+
+      it('should not trigger a refresh when no-cache', function (done) {
+        this.res.cacheControl(false);
+        setTimeout(() => {
+          expect(this.res.app.refreshed).to.eql(false);
+          done();
+        }, 100);
+      });
+      it('should trigger a refresh when passed a String', function (done) {
+        this.res.cacheControl('1s');
+        setTimeout(() => {
+          expect(this.res.app.refreshed).to.eql(true);
+          done();
+        }, 1100);
+      });
+      it('should trigger a refresh when passed a Number', function (done) {
+        this.res.cacheControl(1);
+        setTimeout(() => {
+          expect(this.res.app.refreshed).to.eql(true);
+          done();
+        }, 1100);
       });
     });
   });
