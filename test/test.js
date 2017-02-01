@@ -87,6 +87,7 @@ describe('framework', function () {
       it('should pass through shortest cache value from array of objects with "headers"', function () {
         const upstream = [
           { headers: { ['cache-control']: 'public, max-age=360' } },
+          null,
           { headers: { ['cache-control']: 'public, max-age=350' } }
         ];
 
@@ -100,7 +101,7 @@ describe('framework', function () {
         expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
       });
       it('should fall back to passed maxage when array of header objects do not contain "cache-control"', function () {
-        const upstream = [{ }, { }];
+        const upstream = [{ }, null, null, { }];
 
         this.res.cacheControl('1hr', upstream);
         expect(this.res['Cache-Control']).to.eql('public, max-age=3600');

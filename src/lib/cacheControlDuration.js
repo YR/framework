@@ -28,6 +28,7 @@ module.exports = function cacheControl (maxage, upstream) {
       let min = Infinity;
 
       upstream.forEach((header) => {
+        if (!header) return;
         if ('headers' in header) header = header.headers;
 
         const match = RE_MAX_AGE.exec(header['cache-control']);
