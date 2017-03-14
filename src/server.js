@@ -31,6 +31,7 @@ timing(express.response);
  *  - {Object} locales
  *  - {Object} middleware
  *  - {Object} pages
+ *  - {Object} params
  *  - {Object} renderer
  *  - {DataStore} settings
  *  - {Object} templates
@@ -38,6 +39,7 @@ timing(express.response);
  */
 module.exports = function server (id, port = DEFAULT_PORT, dir = process.cwd(), options = {}) {
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
+  // Combine default with passed middleware
   if (options.middleware && options.middleware.register) {
     const register = options.middleware.register;
 

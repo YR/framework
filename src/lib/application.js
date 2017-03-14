@@ -19,6 +19,7 @@ const BLACKLIST_KEYS = [
  *  - {Object} middleware
  *  - {Object} pages
  *  - {Function} pageHandlerFactory
+ *  - {Object} params
  *  - {Function} renderer
  *  - {DataStore} settings
  *  - {String} sourcepath
@@ -30,6 +31,7 @@ module.exports = function application (id, port, express, options) {
     middleware,
     pages = {},
     pageHandlerFactory,
+    params,
     renderer
   } = options;
   const app = express();
@@ -47,8 +49,9 @@ module.exports = function application (id, port, express, options) {
   // Factory
   app.set('renderer', renderer && renderer(app));
 
-  // Register middleware stack
+  // Register middleware/params stack
   if (middleware && middleware.register) middleware.register(app);
+  if (params && params.register) params.register(app);
 
   // Init pages
   for (const id in pages) {

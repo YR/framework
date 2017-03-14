@@ -31,6 +31,7 @@ timing(express.response);
  *  - {Object} locales
  *  - {Object} middleware
  *  - {Object} pages
+ *  - {Object} params
  *  - {Object} renderer
  *  - {DataStore} settings
  *  - {Object} templates
@@ -42,15 +43,14 @@ module.exports = function server(id) {
   var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
+  // Combine default with passed middleware
   if (options.middleware && options.middleware.register) {
-    (function () {
-      var register = options.middleware.register;
+    var register = options.middleware.register;
 
-      options.middleware.register = function (app) {
-        middleware.register(app);
-        register(app);
-      };
-    })();
+    options.middleware.register = function (app) {
+      middleware.register(app);
+      register(app);
+    };
   } else {
     options.middleware = middleware;
   }

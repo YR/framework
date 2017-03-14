@@ -19,21 +19,21 @@ timing(express.response);
  * @param {Object} options
  *  - {Object} middleware
  *  - {Object} pages
+ *  - {Object} params
  *  - {Object} renderer
  *  - {DataStore} settings
  * @returns {Express}
  */
 module.exports = function server(id, options) {
   if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
+  // Combine default with passed middleware
   if (options.middleware && options.middleware.register) {
-    (function () {
-      var register = options.middleware.register;
+    var register = options.middleware.register;
 
-      options.middleware.register = function (app) {
-        middleware.register(app);
-        register(app);
-      };
-    })();
+    options.middleware.register = function (app) {
+      middleware.register(app);
+      register(app);
+    };
   } else {
     options.middleware = middleware;
   }
