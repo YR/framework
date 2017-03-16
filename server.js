@@ -42,7 +42,9 @@ module.exports = function server(id) {
   var dir = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : process.cwd();
   var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
-  if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
+  if (!options.pageHandlerFactory) {
+    options.pageHandlerFactory = pageHandlerFactory;
+  }
   // Combine default with passed middleware
   if (options.middleware && options.middleware.register) {
     var register = options.middleware.register;
@@ -83,13 +85,19 @@ function load(dir, options) {
     return pages[id].dir;
   })).forEach(function (dirpath) {
     var id = path.basename(dirpath);
-    var configpath = path.join(dirpath, 'config.js');
+    var settingspath = path.join(dirpath, 'settings.js');
     var localespath = path.join(dirpath, 'locales');
     var templatespath = path.join(dirpath, 'templates');
 
-    if (fs.existsSync(localespath)) locales.load(localespath);
-    if (fs.existsSync(templatespath)) templates.load(templatespath);
-    // App config is 'settings', so ignore
-    if (dirpath != dir && fs.existsSync(configpath)) settings.set(id, require(configpath));
+    if (fs.existsSync(localespath)) {
+      locales.load(localespath);
+    }
+    if (fs.existsSync(templatespath)) {
+      templates.load(templatespath);
+    }
+    // App config is already included in 'settings', so ignore
+    if (dirpath !== dir && fs.existsSync(settingspath)) {
+      settings.set(id, require(settingspath));
+    }
   });
 }

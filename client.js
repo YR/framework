@@ -25,7 +25,9 @@ timing(express.response);
  * @returns {Express}
  */
 module.exports = function server(id, options) {
-  if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
+  if (!options.pageHandlerFactory) {
+    options.pageHandlerFactory = pageHandlerFactory;
+  }
   // Combine default with passed middleware
   if (options.middleware && options.middleware.register) {
     var register = options.middleware.register;
