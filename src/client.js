@@ -24,13 +24,15 @@ timing(express.response);
  *  - {DataStore} settings
  * @returns {Express}
  */
-module.exports = function server (id, options) {
-  if (!options.pageHandlerFactory) options.pageHandlerFactory = pageHandlerFactory;
+module.exports = function server(id, options) {
+  if (!options.pageHandlerFactory) {
+    options.pageHandlerFactory = pageHandlerFactory;
+  }
   // Combine default with passed middleware
   if (options.middleware && options.middleware.register) {
     const register = options.middleware.register;
 
-    options.middleware.register = function (app) {
+    options.middleware.register = function(app) {
       middleware.register(app);
       register(app);
     };

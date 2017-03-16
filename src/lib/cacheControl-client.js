@@ -7,7 +7,7 @@ const clock = require('@yr/clock');
  * Patch 'proto' with cacheControl behaviour
  * @param {Object} proto
  */
-module.exports = function (proto) {
+module.exports = function(proto) {
   proto.cacheControl = cacheControl;
 };
 
@@ -17,13 +17,17 @@ module.exports = function (proto) {
  * @param {Object} [upstream]
  * @returns {Object}
  */
-function cacheControl (maxage, upstream) {
+function cacheControl(maxage, upstream) {
   const duration = cacheControlDuration(maxage, upstream);
 
   if (duration) {
-    clock.timeout(duration * 1000, () => {
-      this.app.refresh();
-    }, 'cacheControl');
+    clock.timeout(
+      duration * 1000,
+      () => {
+        this.app.refresh();
+      },
+      'cacheControl'
+    );
   }
 
   return this;

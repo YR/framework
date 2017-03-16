@@ -8,7 +8,7 @@ const CACHE_CONTROL = 'Cache-Control';
  * Patch 'proto' with cacheControl behaviour
  * @param {Object} proto
  */
-module.exports = function (proto) {
+module.exports = function(proto) {
   proto.cacheControl = cacheControl;
 };
 
@@ -18,11 +18,9 @@ module.exports = function (proto) {
  * @param {Object} [upstream]
  * @returns {Object}
  */
-function cacheControl (maxage, upstream) {
+function cacheControl(maxage, upstream) {
   const duration = cacheControlDuration(maxage, upstream);
-  const header = (duration === 0)
-    ? 'private, no-cache'
-    : `public, max-age=${duration}`;
+  const header = duration === 0 ? 'private, no-cache' : `public, max-age=${duration}`;
 
   this.set(CACHE_CONTROL, header);
 

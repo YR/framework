@@ -10,7 +10,7 @@ let id = 0;
  * Patch 'proto' with time behaviour
  * @param {Object} proto
  */
-module.exports = function (proto) {
+module.exports = function(proto) {
   proto.time = time;
 };
 
@@ -20,14 +20,16 @@ module.exports = function (proto) {
  * @param {Function|Number|String} action
  * @returns {Object}
  */
-function time (name, action) {
-  if (!this.timings) this.timings = {};
+function time(name, action) {
+  if (!this.timings) {
+    this.timings = {};
+  }
 
   const type = typeof action;
   // Limit size of marks cache
   const uid = id++ % MAX_MARKS;
   const uname = `${uid}::${name}`;
-  let entry;
+  let entry, tempName;
 
   switch (type) {
     // Handle passing duration
@@ -47,7 +49,7 @@ function time (name, action) {
       entry = marky.stop(uname);
       break;
     default:
-      const tempName = `_${name}`;
+      tempName = `_${name}`;
 
       // "start"
       if (!this.timings[tempName]) {

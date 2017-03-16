@@ -11,7 +11,7 @@ module.exports = {
    * Register middleware for 'app'
    * @param {Express} app
    */
-  register (app) {
+  register(app) {
     app.use(timingMiddleware());
     app.use(idMiddleware());
     app.use(helmet.frameguard());
@@ -21,9 +21,11 @@ module.exports = {
     app.use(helmet.xssFilter({ setOnOldIE: true }));
     app.use(cookieParser());
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({
-      // Don't parse complex objects
-      extended: false
-    }));
+    app.use(
+      bodyParser.urlencoded({
+        // Don't parse complex objects
+        extended: false
+      })
+    );
   }
 };

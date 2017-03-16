@@ -8,7 +8,7 @@ module.exports = {
    * Register middleware for 'app'
    * @param {Express} app
    */
-  register (app) {
+  register(app) {
     app.use(timingMiddleware());
     app.use(idMiddleware(app.get('uid')));
   }

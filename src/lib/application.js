@@ -1,13 +1,8 @@
 'use strict';
 
-const Debug = require('debug');
+const debugFactory = require('debug');
 
-const BLACKLIST_KEYS = [
-  'middleware',
-  'pageHandlerFactory',
-  'renderer',
-  'sourcepath'
-];
+const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'renderer', 'sourcepath'];
 
 /**
  * Retrieve and initialise server instance
@@ -26,7 +21,7 @@ const BLACKLIST_KEYS = [
  *  - {Object} templates
  * @returns {Express}
  */
-module.exports = function application (id, port, express, options) {
+module.exports = function application(id, port, express, options) {
   const {
     middleware,
     pages = {},
@@ -35,11 +30,13 @@ module.exports = function application (id, port, express, options) {
     renderer
   } = options;
   const app = express();
-  const debug = Debug(id);
+  const debug = debugFactory(id);
 
   // Store options
   for (const key in options) {
-    if (!~BLACKLIST_KEYS.indexOf(key)) app.set(key, options[key]);
+    if (!~BLACKLIST_KEYS.indexOf(key)) {
+      app.set(key, options[key]);
+    }
   }
   app.set('debug', debug);
   app.set('id', id);
@@ -50,8 +47,12 @@ module.exports = function application (id, port, express, options) {
   app.set('renderer', renderer && renderer(app));
 
   // Register middleware/params stack
-  if (middleware && middleware.register) middleware.register(app);
-  if (params && params.register) params.register(app);
+  if (middleware && middleware.register) {
+    middleware.register(app);
+  }
+  if (params && params.register) {
+    params.register(app);
+  }
 
   // Init pages
   for (const id in pages) {
@@ -62,7 +63,7 @@ module.exports = function application (id, port, express, options) {
 
       pages[id] = page;
 
-      routes.forEach((route) => {
+      routes.forEach(route => {
         debug('handling %s at %s', id, route);
         app.get(route, pageHandlerFactory(page));
       });
@@ -70,7 +71,9 @@ module.exports = function application (id, port, express, options) {
   }
 
   // Register error middleware stack
-  if (middleware && middleware.registerError) middleware.registerError(app);
+  if (middleware && middleware.registerError) {
+    middleware.registerError(app);
+  }
 
   app.set('server', app.listen(port));
   debug(port ? `listening on: ${port}` : 'listening');

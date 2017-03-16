@@ -12,8 +12,8 @@ const runtime = require('@yr/runtime');
 const server = require('../src/server');
 let app, req, res;
 
-describe('framework', function () {
-  afterEach(function (done) {
+describe('framework', () => {
+  afterEach(done => {
     if (app) {
       try {
         app.removeAllListeners();
@@ -26,101 +26,98 @@ describe('framework', function () {
     }
   });
 
-  describe('server', function () {
-    describe('cacheControl', function () {
-      beforeEach(function () {
-        this.res = {
-          set: function (key, value) {
-            this[key] = value;
+  describe('server', () => {
+    describe('cacheControl', () => {
+      beforeEach(() => {
+        res = {
+          set: (key, value) => {
+            res[key] = value;
           }
         };
-        cacheControlServer(this.res);
+        cacheControlServer(res);
       });
 
-      it('should set no-cache when passed "false"', function () {
-        this.res.cacheControl(false);
-        expect(this.res['Cache-Control']).to.eql('private, no-cache');
+      it('should set no-cache when passed "false"', () => {
+        res.cacheControl(false);
+        expect(res['Cache-Control']).to.eql('private, no-cache');
       });
-      it('should set no-cache when passed "0"', function () {
-        this.res.cacheControl(0);
-        expect(this.res['Cache-Control']).to.eql('private, no-cache');
+      it('should set no-cache when passed "0"', () => {
+        res.cacheControl(0);
+        expect(res['Cache-Control']).to.eql('private, no-cache');
       });
-      it('should pass through a valid header string', function () {
-        this.res.cacheControl('public, max-age=1000');
-        expect(this.res['Cache-Control']).to.eql('public, max-age=1000');
+      it('should pass through a valid header string', () => {
+        res.cacheControl('public, max-age=1000');
+        expect(res['Cache-Control']).to.eql('public, max-age=1000');
       });
-      it('should convert a maxage value passed as String', function () {
-        this.res.cacheControl('1hr');
-        expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
+      it('should convert a maxage value passed as String', () => {
+        res.cacheControl('1hr');
+        expect(res['Cache-Control']).to.eql('public, max-age=3600');
       });
-      it('should add a maxage value passed as Number', function () {
-        this.res.cacheControl(3600);
-        expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
+      it('should add a maxage value passed as Number', () => {
+        res.cacheControl(3600);
+        expect(res['Cache-Control']).to.eql('public, max-age=3600');
       });
-      it('should pass through cache value from header object', function () {
+      it('should pass through cache value from header object', () => {
         const upstream = {
-          ['cache-control']: 'public, max-age=360'
+          'cache-control': 'public, max-age=360'
         };
 
-        this.res.cacheControl('1hr', upstream);
-        expect(this.res['Cache-Control']).to.eql('public, max-age=360');
+        res.cacheControl('1hr', upstream);
+        expect(res['Cache-Control']).to.eql('public, max-age=360');
       });
-      it('should pass through cache value from object with "headers"', function () {
+      it('should pass through cache value from object with "headers"', () => {
         const value = {
           headers: {
-            ['cache-control']: 'public, max-age=360'
+            'cache-control': 'public, max-age=360'
           }
         };
 
-        this.res.cacheControl('1hr', value);
-        expect(this.res['Cache-Control']).to.eql('public, max-age=360');
+        res.cacheControl('1hr', value);
+        expect(res['Cache-Control']).to.eql('public, max-age=360');
       });
-      it('should pass through shortest cache value from array of header objects', function () {
-        const upstream = [
-          { ['cache-control']: 'public, max-age=360' },
-          { ['cache-control']: 'public, max-age=350' }
-        ];
+      it('should pass through shortest cache value from array of header objects', () => {
+        const upstream = [{ 'cache-control': 'public, max-age=360' }, { 'cache-control': 'public, max-age=350' }];
 
-        this.res.cacheControl('1hr', upstream);
-        expect(this.res['Cache-Control']).to.eql('public, max-age=350');
+        res.cacheControl('1hr', upstream);
+        expect(res['Cache-Control']).to.eql('public, max-age=350');
       });
-      it('should pass through shortest cache value from array of objects with "headers"', function () {
+      it('should pass through shortest cache value from array of objects with "headers"', () => {
         const upstream = [
-          { headers: { ['cache-control']: 'public, max-age=360' } },
+          { headers: { 'cache-control': 'public, max-age=360' } },
           null,
-          { headers: { ['cache-control']: 'public, max-age=350' } }
+          { headers: { 'cache-control': 'public, max-age=350' } }
         ];
 
-        this.res.cacheControl('1hr', upstream);
-        expect(this.res['Cache-Control']).to.eql('public, max-age=350');
+        res.cacheControl('1hr', upstream);
+        expect(res['Cache-Control']).to.eql('public, max-age=350');
       });
-      it('should fall back to passed maxage when passed header object does not contain "cache-control"', function () {
+      it('should fall back to passed maxage when passed header object does not contain "cache-control"', () => {
         const upstream = {};
 
-        this.res.cacheControl('1hr', upstream);
-        expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
+        res.cacheControl('1hr', upstream);
+        expect(res['Cache-Control']).to.eql('public, max-age=3600');
       });
-      it('should fall back to passed maxage when array of header objects do not contain "cache-control"', function () {
-        const upstream = [{ }, null, null, { }];
+      it('should fall back to passed maxage when array of header objects do not contain "cache-control"', () => {
+        const upstream = [{}, null, null, {}];
 
-        this.res.cacheControl('1hr', upstream);
-        expect(this.res['Cache-Control']).to.eql('public, max-age=3600');
+        res.cacheControl('1hr', upstream);
+        expect(res['Cache-Control']).to.eql('public, max-age=3600');
       });
-      it('should throw when passed an invalid value', function () {
+      it('should throw when passed an invalid value', () => {
         try {
-          this.res.cacheControl(true);
+          res.cacheControl(true);
           expect.fail();
         } catch (err) {
           expect(err).to.be.an(Error);
         }
         try {
-          this.res.cacheControl('');
+          res.cacheControl('');
           expect.fail();
         } catch (err) {
           expect(err).to.be.an(Error);
         }
         try {
-          this.res.cacheControl('foo');
+          res.cacheControl('foo');
           expect.fail();
         } catch (err) {
           expect(err).to.be.an(Error);
@@ -128,16 +125,16 @@ describe('framework', function () {
       });
     });
 
-    describe('application', function () {
-      it('should initialize an app instance', function () {
+    describe('application', () => {
+      it('should initialize an app instance', () => {
         app = server('foo');
         expect(app).to.have.property('get');
       });
-      it('should define settings on the app instance', function () {
+      it('should define settings on the app instance', () => {
         app = server('foo');
         expect(app.get('id')).to.equal('foo');
       });
-      it('should initialize a page', function () {
+      it('should initialize a page', () => {
         app = server('bar', 8080, 'bar', {
           pages: {
             foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
@@ -146,28 +143,28 @@ describe('framework', function () {
         expect(app.get('pages')).to.have.property('foo');
         expect(app.get('pages').foo).to.have.property('id', 'foo');
       });
-      it('should handle a matching route', function (done) {
+      it('should handle a matching route', done => {
         app = server('bar', 8080, 'bar', {
           pages: {
             foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
           }
         });
-        request(app)
-          .get('/foo')
-          .end((err, res) => {
-            if (err) return done(err);
-            expect(res.text).to.equal('foo');
-            done();
-          });
+        request(app).get('/foo').end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.text).to.equal('foo');
+          done();
+        });
       });
-      it('should generate response id', function (done) {
-        const pageFactory = function (id, app) {
+      it('should generate response id', done => {
+        const pageFactory = (id, app) => {
           return new Page(id, app);
         };
 
         app = server('bar', 8080, 'bar', {
           middleware: {
-            register (app) {
+            register(app) {
               app.use((req, res, next) => {
                 expect(res).to.have.property('id');
                 expect(res.id).to.match(/dev:{36}/);
@@ -179,36 +176,42 @@ describe('framework', function () {
             foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
           }
         });
-        request(app)
-          .get('/foo')
-          .end((err, res) => {
-            if (err) return done(err);
-            done();
-          });
+        request(app).get('/foo').end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          done();
+        });
       });
-      it('should generate response timings', function (done) {
+      it('should generate response timings', done => {
         class P extends Page {
-          handle (req, res, done) {
+          handle(req, res, done) {
             res.write('f');
             res.write('o');
             res.write('o');
-            setTimeout(() => {
-              super.handle(req, res, done);
-            }, 50);
+            setTimeout(
+              () => {
+                super.handle(req, res, done);
+              },
+              50
+            );
           }
-          render (req, res, done) {
-            setTimeout(() => {
-              super.render(req, res, done);
-            }, 50);
+          render(req, res, done) {
+            setTimeout(
+              () => {
+                super.render(req, res, done);
+              },
+              50
+            );
           }
         }
-        const pageFactory = function (id, app) {
+        const pageFactory = (id, app) => {
           return new P(id, app);
         };
 
         app = server('bar', 8080, 'bar', {
           middleware: {
-            register (app) {
+            register(app) {
               app.use((req, res, next) => {
                 onFinished(res, (err, res) => {
                   expect(res.timings).to.have.property('handle');
@@ -223,86 +226,87 @@ describe('framework', function () {
             foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
           }
         });
-        request(app)
-          .get('/foo')
-          .end((err, res) => {
-            if (err) return done(err);
-            expect(res.text).to.equal('foo');
-            done();
-          });
+        request(app).get('/foo').end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.text).to.equal('foo');
+          done();
+        });
       });
     });
   });
 
-  describe('client', function () {
-    describe('pageHandler', function () {
+  describe('client', () => {
+    describe('pageHandler', () => {
       let called;
 
       class BasePage extends Page {
-        init (done) {
+        init(done) {
           // console.log(this.id, 'init', this.state);
           called.push(`init${this.id}`);
           super.init(done);
         }
-        handle (req, res, done) {
+        handle(req, res, done) {
           // console.log(this.id, 'handle', this.state);
           called.push(`handle${this.id}`);
           super.handle(req, res, done);
         }
-        render (req, res, done) {
+        render(req, res, done) {
           // console.log(this.id, 'render', this.state);
           called.push(`render${this.id}`);
           super.render(req, res, done);
         }
-        unrender (req, res, done) {
+        unrender(req, res, done) {
           // console.log(this.id, 'unrender', this.state);
           called.push(`unrender${this.id}`);
           super.unrender(req, res, done);
         }
-        unhandle (req, res, done) {
+        unhandle(req, res, done) {
           // console.log(this.id, 'unhandle', this.state);
           called.push(`unhandle${this.id}`);
           super.unhandle(req, res, done);
         }
       }
 
-      before(function () {
+      before(() => {
         runtime.isBrowser = true;
       });
-      beforeEach(function () {
+      beforeEach(() => {
         called = [];
         req = {};
         app = {
           page: null,
-          get (key) { },
-          set (key, value) {
+          get(key) {},
+          set(key, value) {
             this.page = value;
           }
         };
         res = {
           app,
-          time () {}
+          time() {}
         };
         clientPageHandlerFactory.reset();
       });
-      after(function () {
+      after(() => {
         runtime.isBrowser = false;
       });
 
-      it('should handle a page request', function (done) {
-        app.set = function (key, value) {
+      it('should handle a page request', done => {
+        const page = new BasePage('1', app);
+        const handler = clientPageHandlerFactory(page);
+
+        app.set = (key, value) => {
           expect(key).to.equal('page');
           expect(value).to.equal(page);
         };
-        const page = new BasePage('1', app);
-        const handler = clientPageHandlerFactory(page);
 
         handler(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1']);
         expect(page.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
         done();
       });
-      it('should unhandle an existing page request', function (done) {
+      it('should unhandle an existing page request', done => {
         const page1 = new BasePage('1', app);
         const page2 = new BasePage('2', app);
         const handler1 = clientPageHandlerFactory(page1);
@@ -316,19 +320,25 @@ describe('framework', function () {
         expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
         done();
       });
-      it('should asynchronously unhandle an existing page request', function (done) {
+      it('should asynchronously unhandle an existing page request', done => {
         class P1 extends BasePage {
-          unhandle (req, res, done) {
-            setTimeout(() => {
-              super.unhandle(req, res, done);
-            }, 20);
+          unhandle(req, res, done) {
+            setTimeout(
+              () => {
+                super.unhandle(req, res, done);
+              },
+              20
+            );
           }
         }
         class P2 extends BasePage {
-          init (done) {
-            setTimeout(() => {
-              super.init(done);
-            }, 10);
+          init(done) {
+            setTimeout(
+              () => {
+                super.init(done);
+              },
+              10
+            );
           }
         }
 
@@ -339,20 +349,35 @@ describe('framework', function () {
 
         handler1(req, res, done);
         handler2(req, res, done);
-        setTimeout(() => {
-          expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'init2', 'unhandle1', 'handle2', 'render2']);
-          expect(app.page).to.equal(page2);
-          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
-          done();
-        }, 50);
+        setTimeout(
+          () => {
+            expect(called).to.eql([
+              'init1',
+              'handle1',
+              'render1',
+              'unrender1',
+              'init2',
+              'unhandle1',
+              'handle2',
+              'render2'
+            ]);
+            expect(app.page).to.equal(page2);
+            expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
+            expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+            done();
+          },
+          50
+        );
       });
-      it('should handle another page request while unhandling an existing page request', function (done) {
+      it('should handle another page request while unhandling an existing page request', done => {
         class P extends BasePage {
-          init (done) {
-            setTimeout(() => {
-              super.init(done);
-            }, 10);
+          init(done) {
+            setTimeout(
+              () => {
+                super.init(done);
+              },
+              10
+            );
           }
         }
 
@@ -367,28 +392,47 @@ describe('framework', function () {
         handler2(req, res, done);
         handler3(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1']);
-        setTimeout(() => {
-          expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1', 'init2', 'init3', 'handle3', 'render3']);
-          expect(app.page).to.equal(page3);
-          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-          expect(page2.state).to.equal(Page.INITED);
-          expect(page3.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
-          done();
-        }, 50);
+        setTimeout(
+          () => {
+            expect(called).to.eql([
+              'init1',
+              'handle1',
+              'render1',
+              'unrender1',
+              'unhandle1',
+              'init2',
+              'init3',
+              'handle3',
+              'render3'
+            ]);
+            expect(app.page).to.equal(page3);
+            expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
+            expect(page2.state).to.equal(Page.INITED);
+            expect(page3.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+            done();
+          },
+          50
+        );
       });
-      it('should handle another page request while handling a page request', function (done) {
+      it('should handle another page request while handling a page request', done => {
         class P1 extends BasePage {
-          handle (req, res, done) {
-            setTimeout(() => {
-              super.handle(req, res, done);
-            }, 20);
+          handle(req, res, done) {
+            setTimeout(
+              () => {
+                super.handle(req, res, done);
+              },
+              20
+            );
           }
         }
         class P2 extends BasePage {
-          init (done) {
-            setTimeout(() => {
-              super.init(done);
-            }, 10);
+          init(done) {
+            setTimeout(
+              () => {
+                super.init(done);
+              },
+              10
+            );
           }
         }
 
@@ -400,21 +444,27 @@ describe('framework', function () {
         handler1(req, res, done);
         handler2(req, res, done);
         expect(called).to.eql(['init1', 'unhandle1']);
-        setTimeout(() => {
-          expect(called).to.eql(['init1', 'unhandle1', 'init2', 'handle2', 'render2', 'handle1']);
-          expect(page1.state).to.equal(Page.INITED | Page.UNHANDLED);
-          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
-          expect(app.page).to.equal(page2);
-          done();
-        }, 50);
+        setTimeout(
+          () => {
+            expect(called).to.eql(['init1', 'unhandle1', 'init2', 'handle2', 'render2', 'handle1']);
+            expect(page1.state).to.equal(Page.INITED | Page.UNHANDLED);
+            expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+            expect(app.page).to.equal(page2);
+            done();
+          },
+          50
+        );
       });
-      it('should enable res.write() during handling', function (done) {
+      it('should enable res.write() during handling', done => {
         class P extends BasePage {
-          handle (req, res, done) {
+          handle(req, res, done) {
             res.write();
-            setTimeout(() => {
-              super.handle(req, res, done);
-            }, 20);
+            setTimeout(
+              () => {
+                super.handle(req, res, done);
+              },
+              20
+            );
           }
         }
 
@@ -423,12 +473,15 @@ describe('framework', function () {
 
         handler(req, res, done);
         expect(called).to.eql(['init1', 'render1']);
-        setTimeout(() => {
-          expect(called).to.eql(['init1', 'render1', 'handle1', 'render1']);
-          done();
-        }, 50);
+        setTimeout(
+          () => {
+            expect(called).to.eql(['init1', 'render1', 'handle1', 'render1']);
+            done();
+          },
+          50
+        );
       });
-      it('should allow for page rerender', function (done) {
+      it('should allow for page rerender', done => {
         app.getCurrentContext = () => {
           return { req, res };
         };
@@ -437,47 +490,59 @@ describe('framework', function () {
 
         handler(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1']);
-        setTimeout(() => {
-          page.rerender();
-          expect(called).to.eql(['init1', 'handle1', 'render1', 'render1']);
-          done();
-        }, 50);
+        setTimeout(
+          () => {
+            page.rerender();
+            expect(called).to.eql(['init1', 'handle1', 'render1', 'render1']);
+            done();
+          },
+          50
+        );
       });
     });
 
-    describe('cacheControl', function () {
-      beforeEach(function () {
-        this.res = {
+    describe('cacheControl', () => {
+      beforeEach(() => {
+        res = {
           app: {
             refreshed: false,
-            refresh: function () {
-              this.refreshed = true;
+            refresh: () => {
+              res.app.refreshed = true;
             }
           }
         };
-        cacheControlClient(this.res);
+        cacheControlClient(res);
       });
 
-      it('should not trigger a refresh when no-cache', function (done) {
-        this.res.cacheControl(false);
-        setTimeout(() => {
-          expect(this.res.app.refreshed).to.eql(false);
-          done();
-        }, 100);
+      it('should not trigger a refresh when no-cache', done => {
+        res.cacheControl(false);
+        setTimeout(
+          () => {
+            expect(res.app.refreshed).to.eql(false);
+            done();
+          },
+          100
+        );
       });
-      it('should trigger a refresh when passed a String', function (done) {
-        this.res.cacheControl('1s');
-        setTimeout(() => {
-          expect(this.res.app.refreshed).to.eql(true);
-          done();
-        }, 1100);
+      it('should trigger a refresh when passed a String', done => {
+        res.cacheControl('1s');
+        setTimeout(
+          () => {
+            expect(res.app.refreshed).to.eql(true);
+            done();
+          },
+          1100
+        );
       });
-      it('should trigger a refresh when passed a Number', function (done) {
-        this.res.cacheControl(1);
-        setTimeout(() => {
-          expect(this.res.app.refreshed).to.eql(true);
-          done();
-        }, 1100);
+      it('should trigger a refresh when passed a Number', done => {
+        res.cacheControl(1);
+        setTimeout(
+          () => {
+            expect(res.app.refreshed).to.eql(true);
+            done();
+          },
+          1100
+        );
       });
     });
   });

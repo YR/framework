@@ -4,8 +4,8 @@
  * Response timing middleware
  * @returns {Function}
  */
-module.exports = function () {
-  return function timingMiddleware (req, res, next) {
+module.exports = function() {
+  return function timingMiddleware(req, res, next) {
     res.time('response');
     res.once('finish', finished, res);
     res.once('close', finished, res);
@@ -17,7 +17,7 @@ module.exports = function () {
  * Finished handler
  * Context bound to 'res'
  */
-function finished () {
+function finished() {
   this.time('response');
   this.off('finish', finished);
   this.off('close', finished);

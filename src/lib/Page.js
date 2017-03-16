@@ -21,7 +21,7 @@ module.exports = class Page {
    * @param {String} id
    * @param {Express} app
    */
-  constructor (id, app) {
+  constructor(id, app) {
     this.app = app;
     this.id = id;
     this.state = 0;
@@ -33,11 +33,11 @@ module.exports = class Page {
    * Negative flags will be removed
    * @param {Array} flags
    */
-  appendState (...flags) {
+  appendState(...flags) {
     for (let i = 0, n = flags.length; i < n; i++) {
       // Remove if negative
       if (flags[i] < 0) {
-        this.state &= ~(flags[i] * -1);
+        this.state &= ~(flags[i] * (-1));
       } else {
         this.state |= flags[i];
       }
@@ -50,11 +50,10 @@ module.exports = class Page {
    * @param {Array} flags
    * @returns {Boolean}
    */
-  containsState (...flags) {
+  containsState(...flags) {
     for (let i = 0, n = flags.length; i < n; i++) {
-      if ((flags[i] < 0 && this.state & (flags[i] * -1)
-        || (flags[i] > 0 && !(this.state & flags[i])))) {
-          return false;
+      if ((flags[i] < 0 && this.state & flags[i] * (-1)) || (flags[i] > 0 && !(this.state & flags[i]))) {
+        return false;
       }
     }
     return true;
@@ -64,9 +63,11 @@ module.exports = class Page {
    * Initialize
    * @param {Function} done
    */
-  init (done) {
+  init(done) {
     this.initialised = true;
-    if (done) done();
+    if (done) {
+      done();
+    }
   }
 
   /**
@@ -75,8 +76,10 @@ module.exports = class Page {
    * @param {Response} res
    * @param {Function} done
    */
-  handle (req, res, done) {
-    if (done) done();
+  handle(req, res, done) {
+    if (done) {
+      done();
+    }
   }
 
   /**
@@ -85,8 +88,10 @@ module.exports = class Page {
    * @param {Response} res
    * @param {Function} done
    */
-  render (req, res, done) {
-    if (done) done();
+  render(req, res, done) {
+    if (done) {
+      done();
+    }
   }
 
   /**
@@ -95,8 +100,10 @@ module.exports = class Page {
    * @param {Response} res
    * @param {Function} done
    */
-  unrender (req, res, done) {
-    if (done) done();
+  unrender(req, res, done) {
+    if (done) {
+      done();
+    }
   }
 
   /**
@@ -105,15 +112,17 @@ module.exports = class Page {
    * @param {Response} res
    * @param {Function} done
    */
-  unhandle (req, res, done) {
-    if (done) done();
+  unhandle(req, res, done) {
+    if (done) {
+      done();
+    }
   }
 
   /**
    * Rerender
    * @param {Function} [done]
    */
-  rerender (done) {
+  rerender(done) {
     // Prevent rerender if currently processing
     if (runtime.isBrowser && this.containsState(STATE.RENDERED)) {
       const { req, res } = this.app.getCurrentContext();
@@ -123,7 +132,9 @@ module.exports = class Page {
       this.render(req, res, () => {
         res.time('rerender');
         this.appendState(-STATE.RENDERING, STATE.RENDERED);
-        if (done) done();
+        if (done) {
+          done();
+        }
       });
     }
   }
