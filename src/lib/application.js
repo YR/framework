@@ -2,7 +2,7 @@
 
 const debugFactory = require('debug');
 
-const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'renderer', 'sourcepath'];
+const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render', 'sourcepath'];
 
 /**
  * Retrieve and initialise server instance
@@ -15,7 +15,7 @@ const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'renderer', 'sourcep
  *  - {Object} pages
  *  - {Function} pageHandlerFactory
  *  - {Object} params
- *  - {Function} renderer
+ *  - {Function} render
  *  - {DataStore} settings
  *  - {String} sourcepath
  *  - {Object} templates
@@ -27,7 +27,7 @@ module.exports = function application(id, port, express, options) {
     pages = {},
     pageHandlerFactory,
     params,
-    renderer
+    render
   } = options;
   const app = express();
   const debug = debugFactory(id);
@@ -44,7 +44,7 @@ module.exports = function application(id, port, express, options) {
   app.set('view', null);
   app.set('views', null);
   // Factory
-  app.set('renderer', renderer && renderer(app));
+  app.set('render', render && render(app));
 
   // Register middleware/params stack
   if (middleware && middleware.register) {

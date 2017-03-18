@@ -32,7 +32,7 @@ timing(express.response);
  *  - {Object} middleware
  *  - {Object} pages
  *  - {Object} params
- *  - {Object} renderer
+ *  - {Object} render
  *  - {DataStore} settings
  *  - {Object} templates
  * @returns {Express}
