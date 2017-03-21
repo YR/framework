@@ -62,7 +62,6 @@ function time(name, action) {
       delete this.timings[tempName];
   }
 
-  entry.name = name;
   this.timings[name] = entry;
   return this;
 }
