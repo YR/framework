@@ -6,12 +6,15 @@ const express = require('@yr/express-client');
 const middleware = require('./lib/middleware-client');
 const Page = require('./lib/Page');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-client');
+const rerender = require('./lib/rerender');
 const timing = require('./lib/timing');
 const uuid = require('uuid');
+const write = require('./lib/write');
 
-// Patch express.response
+// Patch response with additional behaviour
 cacheControl(express.response);
 timing(express.response);
+write(express.response);
 
 /**
  * Retrieve and initialise client instance
@@ -41,7 +44,10 @@ module.exports = function server(id, options) {
   }
   options.uid = `client:${uuid.v4()}`;
 
-  return application(id, null, express, options);
+  const app = application(id, null, express, options);
+
+  // Patch with rerender() behaviour
+  return rerender(app);
 };
 
 module.exports.Page = Page;

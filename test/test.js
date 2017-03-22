@@ -7,8 +7,10 @@ const expect = require('expect.js');
 const fooPage = require('./fixtures/foo');
 const onFinished = require('on-finished');
 const Page = require('../src/lib/Page');
+const rerender = require('../src/lib/rerender');
 const request = require('supertest');
 const server = require('../src/server');
+const write = require('../src/lib/write');
 let app, req, res;
 
 describe('framework', () => {
@@ -279,15 +281,22 @@ describe('framework', () => {
         req = {};
         app = {
           page: null,
-          get(key) {},
+          get(key) {
+            return this.page;
+          },
           set(key, value) {
             this.page = value;
+          },
+          getCurrentContext() {
+            return { req, res };
           }
         };
+        rerender(app);
         res = {
           app,
           time() {}
         };
+        write(res);
         clientPageHandlerFactory.reset();
       });
 
@@ -481,9 +490,6 @@ describe('framework', () => {
         );
       });
       it('should allow for page rerender', done => {
-        app.getCurrentContext = () => {
-          return { req, res };
-        };
         const page = new BasePage('1', app);
         const handler = clientPageHandlerFactory(page);
 
@@ -491,7 +497,7 @@ describe('framework', () => {
         expect(called).to.eql(['init1', 'handle1', 'render1']);
         setTimeout(
           () => {
-            page.rerender();
+            app.rerender();
             expect(called).to.eql(['init1', 'handle1', 'render1', 'render1']);
             done();
           },
@@ -504,40 +510,40 @@ describe('framework', () => {
       beforeEach(() => {
         res = {
           app: {
-            refreshed: false,
-            refresh: () => {
-              res.app.refreshed = true;
+            reloaded: false,
+            reload: () => {
+              res.app.reloaded = true;
             }
           }
         };
         cacheControlClient(res);
       });
 
-      it('should not trigger a refresh when no-cache', done => {
+      it('should not trigger a reload when no-cache', done => {
         res.cacheControl(false);
         setTimeout(
           () => {
-            expect(res.app.refreshed).to.eql(false);
+            expect(res.app.reloaded).to.eql(false);
             done();
           },
           100
         );
       });
-      it('should trigger a refresh when passed a String', done => {
+      it('should trigger a reload when passed a String', done => {
         res.cacheControl('1s');
         setTimeout(
           () => {
-            expect(res.app.refreshed).to.eql(true);
+            expect(res.app.reloaded).to.eql(true);
             done();
           },
           1100
         );
       });
-      it('should trigger a refresh when passed a Number', done => {
+      it('should trigger a reload when passed a Number', done => {
         res.cacheControl(1);
         setTimeout(
           () => {
-            expect(res.app.refreshed).to.eql(true);
+            expect(res.app.reloaded).to.eql(true);
             done();
           },
           1100

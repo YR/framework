@@ -118,29 +118,6 @@ module.exports = class Page {
       done();
     }
   }
-
-  /**
-   * Rerender
-   * @param {Function} [done]
-   */
-  rerender(done) {
-    // Prevent rerender if currently processing
-    if (this.containsState(STATE.RENDERED)) {
-      const { req, res } = this.app.getCurrentContext();
-
-      this.debug('rerendering');
-      this.appendState(-STATE.RENDERED, STATE.RENDERING);
-      res.time('rerender');
-      this.render(req, res, (err) => {
-        res.time('rerender');
-        this.debug('rerendered');
-        this.appendState(-STATE.RENDERING, STATE.RENDERED);
-        if (done) {
-          done(err);
-        }
-      });
-    }
-  }
 };
 
 for (const prop in STATE) {

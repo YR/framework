@@ -31,7 +31,6 @@ module.exports = function pageHandler(page) {
    */
   return function pageHandle(req, res, next) {
     pending = page;
-    res.write = resWriteFactory(page, req, res);
     changePage(req, res, err => {
       if (err) {
         return void next(err);
@@ -167,27 +166,4 @@ function setPage(req, res, done) {
       });
     });
   }
-}
-
-/**
- * Factory for partial page render function
- * @param {Page} page
- * @param {Request} req
- * @param {Response} res
- * @returns {Function}
- */
-function resWriteFactory(page, req, res) {
-  return function write() {
-    // Only relevant during HANDLING phase
-    if (page === current && page.state === INITED | HANDLING) {
-      page.debug('rendering');
-      page.appendState(RENDERING);
-      res.time('write');
-      page.render(req, res, () => {
-        res.time('write');
-        page.debug('rendered');
-        page.appendState(-RENDERING);
-      });
-    }
-  };
 }

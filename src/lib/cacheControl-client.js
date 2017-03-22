@@ -24,7 +24,7 @@ function cacheControl(maxage, upstream) {
     clock.timeout(
       duration * 1000,
       () => {
-        this.app.refresh();
+        this.app.reload();
       },
       'cacheControl'
     );
