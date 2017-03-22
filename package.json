@@ -7,7 +7,6 @@
     "@yr/clock": "1.1.x",
     "@yr/express": "4.14.1",
     "@yr/express-client": "2.9.x",
-    "@yr/runtime": "2.0.x",
     "body-parser": "1.17.1",
     "cookie-parser": "1.4.3",
     "debug": "2.x.x",

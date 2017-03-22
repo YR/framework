@@ -1,7 +1,6 @@
 'use strict';
 
 const debugFactory = require('debug');
-const runtime = require('@yr/runtime');
 
 const STATE = {
   INITING: 1,
@@ -126,16 +125,18 @@ module.exports = class Page {
    */
   rerender(done) {
     // Prevent rerender if currently processing
-    if (runtime.isBrowser && this.containsState(STATE.RENDERED)) {
+    if (this.containsState(STATE.RENDERED)) {
       const { req, res } = this.app.getCurrentContext();
 
+      this.debug('rerendering');
       this.appendState(-STATE.RENDERED, STATE.RENDERING);
       res.time('rerender');
-      this.render(req, res, () => {
+      this.render(req, res, (err) => {
         res.time('rerender');
+        this.debug('rerendered');
         this.appendState(-STATE.RENDERING, STATE.RENDERED);
         if (done) {
-          done();
+          done(err);
         }
       });
     }

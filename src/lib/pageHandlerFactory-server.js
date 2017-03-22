@@ -29,7 +29,7 @@ module.exports = function pageHandler(page) {
       page.debug('inited');
       page.appendState(-INITING, INITED);
       if (err) {
-        return next(err);
+        return void next(err);
       }
       page.debug('handling');
       page.appendState(HANDLING);
@@ -39,7 +39,7 @@ module.exports = function pageHandler(page) {
         page.debug('handled');
         page.appendState(-HANDLING, HANDLED);
         if (err) {
-          return next(err);
+          return void next(err);
         }
         // Prevent rendering unhandled/aborted
         if (page.state === INITED | HANDLED) {
@@ -51,7 +51,7 @@ module.exports = function pageHandler(page) {
             page.debug('rendered');
             page.appendState(-RENDERING, RENDERED);
             if (err) {
-              return next(err);
+              return void next(err);
             }
             if (!res.finished) {
               res.end();

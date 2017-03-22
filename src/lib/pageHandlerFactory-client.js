@@ -27,13 +27,14 @@ module.exports = function pageHandler(page) {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
+   * @returns {void}
    */
   return function pageHandle(req, res, next) {
     pending = page;
     res.write = resWriteFactory(page, req, res);
     changePage(req, res, err => {
       if (err) {
-        return next(err);
+        return void next(err);
       }
     });
   };
@@ -71,7 +72,7 @@ function changePage(req, res, done) {
         currentPage.debug('unrendered');
         currentPage.appendState(-UNRENDERING, -RENDERED, UNRENDERED);
         if (err) {
-          return done(err);
+          return void done(err);
         }
         currentPage.debug('unhandling');
         currentPage.appendState(UNHANDLING);
@@ -79,7 +80,7 @@ function changePage(req, res, done) {
           currentPage.debug('unhandled');
           currentPage.appendState(-UNHANDLING, -HANDLED, UNHANDLED);
           if (err) {
-            return done(err);
+            return void done(err);
           }
           if (--outstanding <= 0) {
             setPage(req, res, done);
@@ -94,7 +95,7 @@ function changePage(req, res, done) {
         currentPage.debug('unhandled');
         currentPage.appendState(-UNHANDLING, -HANDLED, UNHANDLED);
         if (err) {
-          return done(err);
+          return void done(err);
         }
         if (--outstanding <= 0) {
           setPage(req, res, done);
@@ -120,7 +121,7 @@ function changePage(req, res, done) {
       return;
     }
     if (err) {
-      return done(err);
+      return void done(err);
     }
     if (--outstanding <= 0) {
       setPage(req, res, done);
@@ -149,7 +150,7 @@ function setPage(req, res, done) {
       currentPage.debug('handled');
       currentPage.appendState(-HANDLING);
       if (err) {
-        return done(err);
+        return void done(err);
       }
       // Protect against possible reassignment to new page
       if (pending || currentPage !== current || currentPage.state !== INITED) {

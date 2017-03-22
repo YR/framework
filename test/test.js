@@ -8,7 +8,6 @@ const fooPage = require('./fixtures/foo');
 const onFinished = require('on-finished');
 const Page = require('../src/lib/Page');
 const request = require('supertest');
-const runtime = require('@yr/runtime');
 const server = require('../src/server');
 let app, req, res;
 
@@ -16,8 +15,14 @@ describe('framework', () => {
   afterEach(done => {
     if (app) {
       try {
+        const server = app.get('server');
+
         app.removeAllListeners();
-        app.get('server').close(done);
+        if (server.listening) {
+          server.close(done);
+        } else {
+          done();
+        }
       } catch (err) {
         done();
       }
@@ -151,7 +156,7 @@ describe('framework', () => {
         });
         request(app).get('/foo').end((err, res) => {
           if (err) {
-            return done(err);
+            return void done(err);
           }
           expect(res.text).to.equal('foo');
           done();
@@ -178,7 +183,7 @@ describe('framework', () => {
         });
         request(app).get('/foo').end((err, res) => {
           if (err) {
-            return done(err);
+            return void done(err);
           }
           done();
         });
@@ -228,7 +233,7 @@ describe('framework', () => {
         });
         request(app).get('/foo').end((err, res) => {
           if (err) {
-            return done(err);
+            return void done(err);
           }
           expect(res.text).to.equal('foo');
           done();
@@ -269,9 +274,6 @@ describe('framework', () => {
         }
       }
 
-      before(() => {
-        runtime.isBrowser = true;
-      });
       beforeEach(() => {
         called = [];
         req = {};
@@ -287,9 +289,6 @@ describe('framework', () => {
           time() {}
         };
         clientPageHandlerFactory.reset();
-      });
-      after(() => {
-        runtime.isBrowser = false;
       });
 
       it('should handle a page request', done => {
