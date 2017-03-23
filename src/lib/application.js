@@ -1,6 +1,7 @@
 'use strict';
 
 const debugFactory = require('debug');
+const clock = require('@yr/clock');
 
 const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render', 'sourcepath'];
 
@@ -75,8 +76,11 @@ module.exports = function application(id, port, express, options) {
     middleware.registerError(app);
   }
 
-  app.set('server', app.listen(port));
-  debug(port ? `listening on: ${port}` : 'listening');
+  // Delay to allow time to complete init
+  clock.immediate(() => {
+    app.set('server', app.listen(port));
+    debug(port ? `listening on: ${port}` : 'listening');
+  });
 
   return app;
 };
