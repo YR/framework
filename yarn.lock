@@ -711,12 +711,12 @@ browser-stdout@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/browser-stdout/-/browser-stdout-1.3.0.tgz#f351d32969d32fa5d7a5567154263d928ae3bd1f"
 
-browserslist@1.7.6, browserslist@^1.0.1, browserslist@^1.5.2, browserslist@^1.7.6:
-  version "1.7.6"
-  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-1.7.6.tgz#af98589ce6e7ab09618d29451faacb81220bd3ba"
+browserslist@1.7.7, browserslist@^1.0.1, browserslist@^1.5.2, browserslist@^1.7.6:
+  version "1.7.7"
+  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-1.7.7.tgz#0bd76704258be829b2398bb50e4b62d1a166b0b9"
   dependencies:
-    caniuse-db "^1.0.30000631"
-    electron-to-chromium "^1.2.5"
+    caniuse-db "^1.0.30000639"
+    electron-to-chromium "^1.2.7"
 
 buble@^0.12.0:
   version "0.12.5"
@@ -746,8 +746,8 @@ buddy-cli@6.1.0:
     signal-exit "3.0.1"
 
 buddy@6.x.x:
-  version "6.13.2"
-  resolved "https://registry.yarnpkg.com/buddy/-/buddy-6.13.2.tgz#de3f422553172d723cc29aae9a3814b418f9590d"
+  version "6.13.3"
+  resolved "https://registry.yarnpkg.com/buddy/-/buddy-6.13.3.tgz#851965d679928468b304050ee9cf8a80db30b58b"
   dependencies:
     async "2.1.5"
     autoprefixer "6.7.7"
@@ -755,7 +755,7 @@ buddy@6.x.x:
     babel-plugin-external-helpers "6.22.0"
     babel-plugin-minify-dead-code-elimination "0.1.4"
     babel-plugin-transform-es2015-modules-commonjs "6.24.0"
-    browserslist "1.7.6"
+    browserslist "1.7.7"
     buddy-cli "6.1.0"
     chalk "1.1.3"
     chokidar "1.6.1"
@@ -770,7 +770,7 @@ buddy@6.x.x:
     pretty-bytes "4.0.2"
     recur-fs "2.2.4"
     source-map "0.5.6"
-    uglify-js "2.8.14"
+    uglify-js "2.8.16"
 
 buffer-shims@^1.0.0:
   version "1.0.0"
@@ -797,7 +797,7 @@ caniuse-api@^1.5.2:
     lodash.memoize "^4.1.0"
     lodash.uniq "^4.3.0"
 
-caniuse-db@^1.0.30000346, caniuse-db@^1.0.30000631, caniuse-db@^1.0.30000634:
+caniuse-db@^1.0.30000346, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
   version "1.0.30000640"
   resolved "https://registry.yarnpkg.com/caniuse-db/-/caniuse-db-1.0.30000640.tgz#7b7fd3cf13c0d9d41f8754b577b202113e2be7ca"
 
@@ -1001,6 +1001,12 @@ css-color-names@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/css-color-names/-/css-color-names-0.0.4.tgz#808adc2e79cf84738069b646cb20ec27beb629e0"
 
+css-tree@1.0.0-alpha17:
+  version "1.0.0-alpha17"
+  resolved "https://registry.yarnpkg.com/css-tree/-/css-tree-1.0.0-alpha17.tgz#7ab95ab72c533917af8be54313fec81841c5223a"
+  dependencies:
+    source-map "^0.5.3"
+
 cssnano@3.10.0:
   version "3.10.0"
   resolved "https://registry.yarnpkg.com/cssnano/-/cssnano-3.10.0.tgz#4f38f6cea2b9b17fa01490f23f1dc68ea65c1c38"
@@ -1044,6 +1050,12 @@ csso@2.3.x, csso@~2.3.1:
   dependencies:
     clap "^1.0.9"
     source-map "^0.5.3"
+
+csso@3.0.x:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/csso/-/csso-3.0.1.tgz#1469af5ee2ec509addadd8777aa0e45acb6b2f58"
+  dependencies:
+    css-tree "1.0.0-alpha17"
 
 dashdash@^1.12.0:
   version "1.14.1"
@@ -1161,7 +1173,7 @@ ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
-electron-to-chromium@^1.2.5:
+electron-to-chromium@^1.2.7:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.2.8.tgz#22c2e6200d350da27d6050db7e3f6f85d18cf4ed"
 
@@ -1394,8 +1406,8 @@ glob@7.1.1, glob@^7.0.5:
     path-is-absolute "^1.0.0"
 
 globals@^9.0.0:
-  version "9.16.0"
-  resolved "https://registry.yarnpkg.com/globals/-/globals-9.16.0.tgz#63e903658171ec2d9f51b1d31de5e2b8dc01fb80"
+  version "9.17.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-9.17.0.tgz#0c0ca696d9b9bb694d2e5470bd37777caad50286"
 
 graceful-fs@^4.1.2:
   version "4.1.11"
@@ -1560,7 +1572,7 @@ ini@~1.3.0:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.4.tgz#0537cb79daf59b59a1a517dff706c86ec039162e"
 
-inline-source@5.2.0, inline-source@5.2.x:
+inline-source@5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/inline-source/-/inline-source-5.2.0.tgz#e31b148a828d2fabb3d7ac6476f5c8992d0350c7"
   dependencies:
@@ -1571,15 +1583,26 @@ inline-source@5.2.0, inline-source@5.2.x:
     svgo "0.7.x"
     uglify-js "2.7.x"
 
+inline-source@5.2.x:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/inline-source/-/inline-source-5.2.1.tgz#867fa4fa3e75b3a6dd904a12ef75fb222cf0c10a"
+  dependencies:
+    csso "3.0.x"
+    htmlparser2 "3.9.x"
+    is-plain-obj "1.1.x"
+    object-assign "4.1.x"
+    svgo "0.7.x"
+    uglify-js "2.8.x"
+
 invariant@^2.2.0:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.2.tgz#9e1f56ac0acdb6bf303306f338be3b204ae60360"
   dependencies:
     loose-envify "^1.0.0"
 
-ipaddr.js@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.2.0.tgz#8aba49c9192799585bdd643e0ccb50e8ae777ba4"
+ipaddr.js@1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.3.0.tgz#1e03a52fdad83a8bbb2b25cbf4998b4cffcd3dec"
 
 is-absolute-url@^2.0.0:
   version "2.1.0"
@@ -2344,11 +2367,11 @@ process-nextick-args@~1.0.6:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-1.0.7.tgz#150e20b756590ad3f91093f25a4f2ad8bff30ba3"
 
 proxy-addr@~1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/proxy-addr/-/proxy-addr-1.1.3.tgz#dc97502f5722e888467b3fa2297a7b1ff47df074"
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/proxy-addr/-/proxy-addr-1.1.4.tgz#27e545f6960a44a627d9b44467e35c1b6b4ce2f3"
   dependencies:
     forwarded "~0.1.0"
-    ipaddr.js "1.2.0"
+    ipaddr.js "1.3.0"
 
 punycode@^1.4.1:
   version "1.4.1"
@@ -2787,13 +2810,14 @@ uglify-js@2.7.x:
     uglify-to-browserify "~1.0.0"
     yargs "~3.10.0"
 
-uglify-js@2.8.14:
-  version "2.8.14"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-2.8.14.tgz#25b15d1af39b21752ee33703adbf432e8bc8f77d"
+uglify-js@2.8.16, uglify-js@2.8.x:
+  version "2.8.16"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-2.8.16.tgz#d286190b6eefc6fd65eb0ecac6551e0b0e8839a4"
   dependencies:
     source-map "~0.5.1"
-    uglify-to-browserify "~1.0.0"
     yargs "~3.10.0"
+  optionalDependencies:
+    uglify-to-browserify "~1.0.0"
 
 uglify-to-browserify@~1.0.0:
   version "1.0.2"
