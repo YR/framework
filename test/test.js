@@ -10,7 +10,6 @@ const Page = require('../src/lib/Page');
 const rerender = require('../src/lib/rerender');
 const request = require('supertest');
 const server = require('../src/server');
-const write = require('../src/lib/write');
 let app, req, res;
 
 describe('framework', () => {
@@ -296,8 +295,7 @@ describe('framework', () => {
           app,
           time() {}
         };
-        write(res);
-        clientPageHandlerFactory.reset();
+        clientPageHandlerFactory.__reset();
       });
 
       it('should handle a page request', done => {
@@ -463,10 +461,9 @@ describe('framework', () => {
           50
         );
       });
-      it('should enable res.write() during handling', done => {
+      it('should call res.write() during handling', done => {
         class P extends BasePage {
           handle(req, res, done) {
-            res.write();
             setTimeout(
               () => {
                 super.handle(req, res, done);
@@ -480,7 +477,7 @@ describe('framework', () => {
         const handler = clientPageHandlerFactory(page);
 
         handler(req, res, done);
-        expect(called).to.eql(['init1', 'render1']);
+        expect(called).to.eql(['init1']);
         setTimeout(
           () => {
             expect(called).to.eql(['init1', 'render1', 'handle1', 'render1']);

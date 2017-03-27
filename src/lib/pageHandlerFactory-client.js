@@ -1,5 +1,7 @@
 'use strict';
 
+const clock = require('@yr/clock');
+
 const {
   INITING,
   INITED,
@@ -27,7 +29,6 @@ module.exports = function pageHandler(page) {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
-   * @returns {void}
    */
   return function pageHandle(req, res, next) {
     pending = page;
@@ -41,9 +42,9 @@ module.exports = function pageHandler(page) {
 
 /**
  * Reset current/pending page state
- * Warning: this is only for testing!
+ * Private: this is only for testing!
  */
-module.exports.reset = function() {
+module.exports.__reset = function() {
   current = null;
   pending = null;
 };
@@ -63,44 +64,14 @@ function changePage(req, res, done) {
 
   if (currentPage) {
     outstanding++;
-    // Unrender before unhandling
-    if (currentPage.containsState(RENDERED)) {
-      currentPage.debug('unrendering');
-      currentPage.appendState(UNRENDERING);
-      currentPage.unrender(req, res, err => {
-        currentPage.debug('unrendered');
-        currentPage.appendState(-UNRENDERING, -RENDERED, UNRENDERED);
-        if (err) {
-          return void done(err);
-        }
-        currentPage.debug('unhandling');
-        currentPage.appendState(UNHANDLING);
-        currentPage.unhandle(req, res, err => {
-          currentPage.debug('unhandled');
-          currentPage.appendState(-UNHANDLING, -HANDLED, UNHANDLED);
-          if (err) {
-            return void done(err);
-          }
-          if (--outstanding <= 0) {
-            setPage(req, res, done);
-          }
-        });
-      });
-      // Not rendered yet, so only unhandle
-    } else {
-      currentPage.debug('unhandling');
-      currentPage.appendState(UNHANDLING);
-      currentPage.unhandle(req, res, err => {
-        currentPage.debug('unhandled');
-        currentPage.appendState(-UNHANDLING, -HANDLED, UNHANDLED);
-        if (err) {
-          return void done(err);
-        }
-        if (--outstanding <= 0) {
-          setPage(req, res, done);
-        }
-      });
-    }
+    resetPage(currentPage, req, res, err => {
+      if (err) {
+        return void done(err);
+      }
+      if (--outstanding <= 0) {
+        setPage(req, res, done);
+      }
+    });
   }
 
   pendingPage.state = 0;
@@ -129,6 +100,60 @@ function changePage(req, res, done) {
 }
 
 /**
+ * Reset currently active 'page'
+ * @param {Page} page
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} done
+ */
+function resetPage(page, req, res, done) {
+  // Unrender before unhandling
+  if (page.containsState(RENDERED)) {
+    unrenderPage(page, req, res, done);
+    // Not rendered yet, so only unhandle
+  } else {
+    unhandlePage(page, req, res, done);
+  }
+}
+
+/**
+ * Unrender currently active 'page'
+ * @param {Page} page
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} done
+ */
+function unrenderPage(page, req, res, done) {
+  page.debug('unrendering');
+  page.appendState(UNRENDERING);
+  page.unrender(req, res, err => {
+    page.debug('unrendered');
+    page.appendState(-UNRENDERING, -RENDERED, UNRENDERED);
+    if (err) {
+      return void done(err);
+    }
+    unhandlePage(page, req, res, done);
+  });
+}
+
+/**
+ * Unhandle currently active 'page'
+ * @param {Page} page
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} done
+ */
+function unhandlePage(page, req, res, done) {
+  page.debug('unhandling');
+  page.appendState(UNHANDLING);
+  page.unhandle(req, res, err => {
+    page.debug('unhandled');
+    page.appendState(-UNHANDLING, -HANDLED, UNHANDLED);
+    done(err);
+  });
+}
+
+/**
  * Set current page
  * @param {Request} req
  * @param {Response} res
@@ -153,6 +178,7 @@ function setPage(req, res, done) {
       }
       // Protect against possible reassignment to new page
       if (pending || currentPage !== current || currentPage.state !== INITED) {
+        currentPage.debug('aborting render', currentPage.state);
         return;
       }
       currentPage.debug('rendering');
@@ -165,5 +191,29 @@ function setPage(req, res, done) {
         done(err);
       });
     });
+    // Trigger prerender if async handling
+    clock.frame(() => {
+      // Only relevant during HANDLING phase
+      if (!pending && currentPage === current && currentPage.state === (INITED | HANDLING)) {
+        prerenderPage(currentPage, req, res);
+      }
+    });
   }
+}
+
+/**
+ * Prerender 'page'
+ * @param {Page} page
+ * @param {Request} req
+ * @param {Response} res
+ */
+function prerenderPage(page, req, res) {
+  page.debug('prerendering');
+  page.appendState(RENDERING);
+  res.time('prerender');
+  page.render(req, res, () => {
+    res.time('prerender');
+    page.debug('prerendered');
+    page.appendState(-RENDERING);
+  });
 }
