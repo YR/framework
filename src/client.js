@@ -2,6 +2,7 @@
 
 const application = require('./lib/application');
 const cacheControl = require('./lib/cacheControl-client');
+const clock = require('@yr/clock');
 const express = require('@yr/express-client');
 const middleware = require('./lib/middleware-client');
 const Page = require('./lib/Page');
@@ -42,10 +43,16 @@ module.exports = function server(id, options) {
   }
   options.uid = `client:${uuid.v4()}`;
 
-  const app = application(id, null, express, options);
-
   // Patch with rerender() behaviour
-  return rerender(app);
+  const app = rerender(application(id, express, options));
+
+  // Delay to allow time to complete init
+  clock.frame(() => {
+    app.set('server', app.listen());
+    app.get('debug')('listening');
+  });
+
+  return app;
 };
 
 module.exports.Page = Page;

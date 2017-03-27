@@ -1,14 +1,12 @@
 'use strict';
 
 const debugFactory = require('debug');
-const clock = require('@yr/clock');
 
 const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render', 'sourcepath'];
 
 /**
  * Retrieve and initialise server instance
  * @param {String} id
- * @param {Number} port
  * @param {Express} express
  * @param {Object} options
  *  - {Object} locales
@@ -22,7 +20,7 @@ const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render', 'sourcepat
  *  - {Object} templates
  * @returns {Express}
  */
-module.exports = function application(id, port, express, options) {
+module.exports = function application(id, express, options) {
   const {
     middleware,
     pages = {},
@@ -75,12 +73,6 @@ module.exports = function application(id, port, express, options) {
   if (middleware && middleware.registerError) {
     middleware.registerError(app);
   }
-
-  // Delay to allow time to complete init
-  clock.immediate(() => {
-    app.set('server', app.listen(port));
-    debug(port ? `listening on: ${port}` : 'listening');
-  });
 
   return app;
 };
