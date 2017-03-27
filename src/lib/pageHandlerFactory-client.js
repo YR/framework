@@ -62,7 +62,7 @@ function changePage(req, res, done) {
 
   current = null;
 
-  if (currentPage) {
+  if (currentPage && currentPage !== pendingPage) {
     outstanding++;
     resetPage(currentPage, req, res, err => {
       if (err) {
