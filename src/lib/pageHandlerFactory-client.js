@@ -88,6 +88,9 @@ function changePage(req, res, done) {
     res.time('init');
     pendingPage.debug('inited');
     pendingPage.appendState(-INITING, INITED);
+    if (err) {
+      return void done(err);
+    }
     // Make sure flag is set in case super not called
     if (!pendingPage.initialised) {
       pendingPage.initialised = true;
@@ -95,9 +98,6 @@ function changePage(req, res, done) {
     // Protect against possible reassignment to new pending page
     if (pendingPage !== pending) {
       return void done();
-    }
-    if (err) {
-      return void done(err);
     }
     if (--outstanding <= 0) {
       setPage(req, res, done);
