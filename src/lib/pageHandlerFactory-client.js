@@ -1,6 +1,7 @@
 'use strict';
 
 const clock = require('@yr/clock');
+const write = require('./write');
 
 const {
   INITING,
@@ -15,6 +16,7 @@ const {
   UNHANDLED
 } = require('./Page');
 
+const noop = () => {};
 let current = null;
 let pending = null;
 
@@ -32,7 +34,11 @@ module.exports = function pageHandler(page) {
    */
   return function pageHandle(req, res, next) {
     pending = page;
+    // Enable partial render support
+    res.write = write(page, req, res);
     changePage(req, res, err => {
+      // Restore default
+      res.write = noop;
       if (err) {
         return void next(err);
       }
@@ -88,7 +94,7 @@ function changePage(req, res, done) {
     }
     // Protect against possible reassignment to new pending page
     if (pendingPage !== pending) {
-      return;
+      return void done();
     }
     if (err) {
       return void done(err);
@@ -176,10 +182,10 @@ function setPage(req, res, done) {
       if (err) {
         return void done(err);
       }
-      // Protect against possible reassignment to new page
+      // Guard against possible reassignment to new page
       if (pending || currentPage !== current || currentPage.state !== INITED) {
         currentPage.debug('aborting render', currentPage.state);
-        return;
+        return void done();
       }
       currentPage.debug('rendering');
       currentPage.appendState(HANDLED, RENDERING);
@@ -193,27 +199,10 @@ function setPage(req, res, done) {
     });
     // Trigger prerender if async handling
     clock.frame(() => {
-      // Only relevant during HANDLING phase
-      if (!pending && currentPage === current && currentPage.state === (INITED | HANDLING)) {
-        prerenderPage(currentPage, req, res);
+      // Guard against possible reassignment to new page
+      if (!pending && currentPage === current) {
+        res.write();
       }
     });
   }
-}
-
-/**
- * Prerender 'page'
- * @param {Page} page
- * @param {Request} req
- * @param {Response} res
- */
-function prerenderPage(page, req, res) {
-  page.debug('prerendering');
-  page.appendState(RENDERING);
-  res.time('prerender');
-  page.render(req, res, () => {
-    res.time('prerender');
-    page.debug('prerendered');
-    page.appendState(-RENDERING);
-  });
 }

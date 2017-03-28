@@ -461,7 +461,7 @@ describe('framework', () => {
           50
         );
       });
-      it('should call res.write() during handling', done => {
+      it('should prerender during async handling', done => {
         class P extends BasePage {
           handle(req, res, done) {
             setTimeout(
@@ -481,6 +481,32 @@ describe('framework', () => {
         setTimeout(
           () => {
             expect(called).to.eql(['init1', 'render1', 'handle1', 'render1']);
+            done();
+          },
+          50
+        );
+      });
+      it('should allow for res.write() during async handling', done => {
+        class P extends BasePage {
+          handle(req, res, done) {
+            res.write();
+            setTimeout(
+              () => {
+                super.handle(req, res, done);
+              },
+              20
+            );
+          }
+        }
+
+        const page = new P('1', app);
+        const handler = clientPageHandlerFactory(page);
+
+        handler(req, res, done);
+        expect(called).to.eql(['init1', 'render1']);
+        setTimeout(
+          () => {
+            expect(called).to.eql(['init1', 'render1', 'render1', 'handle1', 'render1']);
             done();
           },
           50
