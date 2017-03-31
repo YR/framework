@@ -167,6 +167,7 @@ function unhandlePage(page, req, res, done) {
  */
 function setPage(req, res, done) {
   const currentPage = pending;
+  let frameId;
 
   if (currentPage.state === INITED) {
     current = currentPage;
@@ -174,11 +175,21 @@ function setPage(req, res, done) {
     res.app.set('page', currentPage);
     currentPage.debug('handling');
     currentPage.appendState(HANDLING);
-    res.time('handle');
+    // Trigger prerender if handle is async and not a reload
+    if (!req.reloaded) {
+      frameId = clock.frame(() => {
+        // Guard against possible reassignment to new page
+        if (!pending && currentPage === current) {
+          res.write();
+        }
+      });
+    }
+   res.time('handle');
     currentPage.handle(req, res, err => {
       res.time('handle');
       currentPage.debug('handled');
       currentPage.appendState(-HANDLING);
+      clock.cancel(frameId);
       if (err) {
         return void done(err);
       }
@@ -196,13 +207,6 @@ function setPage(req, res, done) {
         currentPage.appendState(-RENDERING, RENDERED);
         done(err);
       });
-    });
-    // Trigger prerender if async handling
-    clock.frame(() => {
-      // Guard against possible reassignment to new page
-      if (!pending && currentPage === current) {
-        res.write();
-      }
     });
   }
 }
