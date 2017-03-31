@@ -44,15 +44,7 @@ module.exports = function server(id, options) {
   options.uid = `client:${uuid.v4()}`;
 
   // Patch with rerender() behaviour
-  const app = rerender(application(id, express, options));
-
-  // Delay to allow time to complete init
-  clock.frame(() => {
-    app.set('server', app.listen());
-    app.get('debug')('listening');
-  });
-
-  return app;
+  return rerender(application(id, 0, express, options));
 };
 
 module.exports.Page = Page;

@@ -7,6 +7,7 @@ const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render', 'sourcepat
 /**
  * Retrieve and initialise server instance
  * @param {String} id
+ * @param {Number} port
  * @param {Express} express
  * @param {Object} options
  *  - {Object} locales
@@ -20,7 +21,7 @@ const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render', 'sourcepat
  *  - {Object} templates
  * @returns {Express}
  */
-module.exports = function application(id, express, options) {
+module.exports = function application(id, port, express, options) {
   const {
     middleware,
     pages = {},
@@ -73,6 +74,13 @@ module.exports = function application(id, express, options) {
   if (middleware && middleware.registerError) {
     middleware.registerError(app);
   }
+
+  const originalListen = app.listen;
+
+  app.listen = () => {
+    app.set('server', originalListen(port));
+    app.get('debug')(`listening ${port ? 'on: ' + port : ''}`);
+  };
 
   return app;
 };

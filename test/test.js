@@ -155,6 +155,7 @@ describe('framework', () => {
             foo: { dir: 'foo', pageFactory: fooPage, routes: ['/foo'] }
           }
         });
+        app.listen();
         request(app).get('/foo').end((err, res) => {
           if (err) {
             return void done(err);
@@ -182,6 +183,7 @@ describe('framework', () => {
             foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
           }
         });
+        app.listen();
         request(app).get('/foo').end((err, res) => {
           if (err) {
             return void done(err);
@@ -232,6 +234,7 @@ describe('framework', () => {
             foo: { dir: 'foo', pageFactory, routes: ['/foo'] }
           }
         });
+        app.listen();
         request(app).get('/foo').end((err, res) => {
           if (err) {
             return void done(err);

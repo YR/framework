@@ -55,12 +55,7 @@ module.exports = function server(id, port = DEFAULT_PORT, dir = process.cwd(), o
 
   load(dir, options);
 
-  const app = application(id, express, options);
-
-  app.set('server', app.listen(port));
-  app.get('debug')(`listening on: ${port}`);
-
-  return app;
+  return application(id, port, express, options);
 };
 
 module.exports.Page = Page;

@@ -21,7 +21,7 @@ module.exports = function writeFactory(page, req, res) {
       res.time('write');
       page.render(req, res, () => {
         res.time('write');
-        page.debug('rendered (write');
+        page.debug('rendered (write)');
         page.appendState(-RENDERING);
       });
     }
