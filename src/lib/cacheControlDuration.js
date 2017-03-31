@@ -3,6 +3,7 @@
 const ms = require('ms');
 
 const RE_MAX_AGE = /max-age=(\d+)/;
+const GRACE = 10;
 
 /**
  * Retrieve cache control duration (in seconds)
@@ -40,9 +41,11 @@ module.exports = function cacheControl(maxage, upstream) {
         }
 
         const match = RE_MAX_AGE.exec(header['cache-control']);
+        const value = match && match.length && parseInt(match[1], 10) || Infinity;
 
-        if (match && match.length && parseInt(match[1], 10) < min) {
-          min = match[1];
+        // Take highest if within GRACE
+        if (value < min + GRACE) {
+          min = value;
           maxage = header['cache-control'];
         }
       });

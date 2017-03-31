@@ -91,11 +91,20 @@ describe('framework', () => {
         const upstream = [
           { headers: { 'cache-control': 'public, max-age=360' } },
           null,
-          { headers: { 'cache-control': 'public, max-age=350' } }
+          { headers: { 'cache-control': 'public, max-age=340' } }
         ];
 
         res.cacheControl('1hr', upstream);
-        expect(res['Cache-Control']).to.eql('public, max-age=350');
+        expect(res['Cache-Control']).to.eql('public, max-age=340');
+      });
+      it('should pass through highest cache value when within grace amount', () => {
+        const upstream = [
+          { headers: { 'cache-control': 'public, max-age=351' } },
+          { headers: { 'cache-control': 'public, max-age=360' } }
+        ];
+
+        res.cacheControl('1hr', upstream);
+        expect(res['Cache-Control']).to.eql('public, max-age=360');
       });
       it('should fall back to passed maxage when passed header object does not contain "cache-control"', () => {
         const upstream = {};
