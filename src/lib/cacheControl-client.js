@@ -14,7 +14,7 @@ module.exports = function(proto) {
 /**
  * Set cache control header based on 'maxage'
  * @param {String|Number|Boolean} maxage
- * @param {Object} [upstream]
+ * @param {Array|Object} [upstream]
  * @returns {Object}
  */
 function cacheControl(maxage, upstream) {

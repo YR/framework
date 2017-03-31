@@ -8,7 +8,7 @@ const RE_MAX_AGE = /max-age=(\d+)/;
  * Retrieve cache control duration (in seconds)
  * based on 'maxage' and optional 'upstream' headers
  * @param {String|Number|Boolean} maxage
- * @param {Object} [upstream]
+ * @param {Array|Object} [upstream]
  * @returns {Number}
  */
 module.exports = function cacheControl(maxage, upstream) {
