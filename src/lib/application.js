@@ -78,8 +78,12 @@ module.exports = function application(id, port, express, options) {
   const originalListen = app.listen;
 
   app.listen = () => {
-    app.set('server', originalListen(port));
+    const server = originalListen.call(app, port);
+
+    app.set('server', server);
     app.get('debug')(`listening ${port ? 'on: ' + port : ''}`);
+
+    return server;
   };
 
   return app;
