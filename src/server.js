@@ -59,6 +59,8 @@ module.exports = function server(id, port = DEFAULT_PORT, dir = process.cwd(), o
 };
 
 module.exports.Page = Page;
+module.exports.request = express.request;
+module.exports.response = express.response;
 module.exports.static = express.static;
 module.exports.query = express.query;
 

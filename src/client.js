@@ -2,7 +2,6 @@
 
 const application = require('./lib/application');
 const cacheControl = require('./lib/cacheControl-client');
-const clock = require('@yr/clock');
 const express = require('@yr/express-client');
 const middleware = require('./lib/middleware-client');
 const Page = require('./lib/Page');
@@ -48,3 +47,5 @@ module.exports = function server(id, options) {
 };
 
 module.exports.Page = Page;
+module.exports.request = express.request;
+module.exports.response = express.response;
