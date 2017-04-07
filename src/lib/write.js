@@ -14,8 +14,8 @@ module.exports = function writeFactory(page, req, res) {
    * Partial render
    */
   return function write() {
-    // Only relevant during HANDLING phase
-    if (page && page.state === (INITED | HANDLING)) {
+    // Only relevant during HANDLING phase for original request
+    if (!req.reloaded && page !== undefined && page.state === (INITED | HANDLING)) {
       page.debug('rendering (write)');
       page.appendState(RENDERING);
       res.time('write');
