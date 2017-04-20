@@ -2,8 +2,8 @@
 
 const ms = require('ms');
 
-const RE_MAX_AGE = /max-age=(\d+)/;
 const GRACE = 10;
+const RE_MAX_AGE = /max-age=(\d+)/;
 
 /**
  * Retrieve cache control duration (in seconds)
