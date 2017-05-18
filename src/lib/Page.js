@@ -66,7 +66,7 @@ module.exports = class Page {
    */
   init(done) {
     this.initialised = true;
-    if (done) {
+    if (done != null) {
       done();
     }
   }
@@ -78,7 +78,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   handle(req, res, done) {
-    if (done) {
+    if (done != null) {
       done();
     }
   }
@@ -90,7 +90,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   render(req, res, done) {
-    if (done) {
+    if (done != null) {
       done();
     }
   }
@@ -102,7 +102,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   unrender(req, res, done) {
-    if (done) {
+    if (done != null) {
       done();
     }
   }
@@ -114,7 +114,7 @@ module.exports = class Page {
    * @param {Function} done
    */
   unhandle(req, res, done) {
-    if (done) {
+    if (done != null) {
       done();
     }
   }

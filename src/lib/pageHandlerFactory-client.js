@@ -39,7 +39,7 @@ module.exports = function pageHandler(page) {
     changePage(req, res, err => {
       // Restore default
       res.write = noop;
-      if (err) {
+      if (err != null) {
         return void next(err);
       }
     });
@@ -68,10 +68,10 @@ function changePage(req, res, done) {
 
   current = null;
 
-  if (currentPage && currentPage !== pendingPage) {
+  if (currentPage != null && currentPage !== pendingPage) {
     outstanding++;
     resetPage(currentPage, req, res, err => {
-      if (err) {
+      if (err != null) {
         return void done(err);
       }
       if (--outstanding <= 0) {
@@ -88,7 +88,7 @@ function changePage(req, res, done) {
     res.time('init');
     pendingPage.debug('inited');
     pendingPage.appendState(-INITING, INITED);
-    if (err) {
+    if (err != null) {
       return void done(err);
     }
     // Make sure flag is set in case super not called
@@ -135,7 +135,7 @@ function unrenderPage(page, req, res, done) {
   page.unrender(req, res, err => {
     page.debug('unrendered');
     page.appendState(-UNRENDERING, -RENDERED, UNRENDERED);
-    if (err) {
+    if (err != null) {
       return void done(err);
     }
     unhandlePage(page, req, res, done);
@@ -167,7 +167,6 @@ function unhandlePage(page, req, res, done) {
  */
 function setPage(req, res, done) {
   const currentPage = pending;
-  let frameId;
 
   if (currentPage.state === INITED) {
     current = currentPage;
@@ -175,26 +174,16 @@ function setPage(req, res, done) {
     res.app.set('page', currentPage);
     currentPage.debug('handling');
     currentPage.appendState(HANDLING);
-    // Trigger prerender if handle is async and not a reload
-    if (!req.reloaded) {
-      frameId = clock.frame(() => {
-        // Guard against possible reassignment to new page
-        if (!pending && currentPage === current) {
-          res.write();
-        }
-      });
-    }
-   res.time('handle');
+    res.time('handle');
     currentPage.handle(req, res, err => {
       res.time('handle');
       currentPage.debug('handled');
       currentPage.appendState(-HANDLING);
-      clock.cancel(frameId);
-      if (err) {
+      if (err != null) {
         return void done(err);
       }
       // Guard against possible reassignment to new page
-      if (pending || currentPage !== current || currentPage.state !== INITED) {
+      if (pending != null || currentPage !== current || currentPage.state !== INITED) {
         currentPage.debug('aborting render', currentPage.state);
         return void done();
       }
@@ -208,5 +197,14 @@ function setPage(req, res, done) {
         done(err);
       });
     });
+    // Trigger prerender if handle is async and not a reload
+    if (!req.reloaded) {
+      clock.immediate(() => {
+        // Guard against possible reassignment to new page
+        if (pending == null && currentPage === current && currentPage.containsState(HANDLING)) {
+          res.write();
+        }
+      });
+    }
   }
 }

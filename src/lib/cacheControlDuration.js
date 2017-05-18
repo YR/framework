@@ -22,18 +22,18 @@ module.exports = function cacheControl(maxage, upstream) {
     const tmp = ms(maxage);
 
     // Convert to seconds
-    if (tmp && typeof tmp === 'number') {
+    if (tmp != null && typeof tmp === 'number') {
       maxage = tmp / 1000;
     }
   }
 
   // Pass through upstream header value
-  if (upstream) {
+  if (upstream != null) {
     if (Array.isArray(upstream)) {
       let min = Infinity;
 
       upstream.forEach(header => {
-        if (!header) {
+        if (header == null) {
           return;
         }
         if ('headers' in header) {
@@ -41,7 +41,7 @@ module.exports = function cacheControl(maxage, upstream) {
         }
 
         const match = RE_MAX_AGE.exec(header['cache-control']);
-        const value = match && match.length && parseInt(match[1], 10) || Infinity;
+        const value = match != null && match.length > 0 && parseInt(match[1], 10) || Infinity;
 
         // Take highest if within GRACE
         if (value < min + GRACE) {
@@ -53,7 +53,7 @@ module.exports = function cacheControl(maxage, upstream) {
       if ('headers' in upstream) {
         upstream = upstream.headers;
       }
-      if (upstream['cache-control']) {
+      if (upstream['cache-control'] != null) {
         maxage = upstream['cache-control'];
       }
     }
@@ -63,11 +63,12 @@ module.exports = function cacheControl(maxage, upstream) {
   if (typeof maxage === 'number') {
     return maxage;
   }
+
   // Full header
   if (typeof maxage === 'string' && ~maxage.indexOf('max-age=')) {
     const match = RE_MAX_AGE.exec(maxage);
 
-    return (match && match.length && parseInt(match[1], 10)) || 0;
+    return (match != null && match.length > 0 && parseInt(match[1], 10)) || 0;
   }
 
   throw Error(`Invalid cache control value: ${maxage}`);

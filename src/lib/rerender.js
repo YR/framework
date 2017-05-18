@@ -20,7 +20,7 @@ function rerender(done) {
   const page = this.get('page');
 
   // Prevent rerender if currently processing
-  if (page && page.containsState(RENDERED)) {
+  if (page !== undefined && page.containsState(RENDERED)) {
     const { req, res } = this.getCurrentContext();
 
     page.debug('rerendering');
@@ -30,7 +30,7 @@ function rerender(done) {
       res.time('rerender');
       page.debug('rerendered');
       page.appendState(-RENDERING, RENDERED);
-      if (done) {
+      if (done != null) {
         done(err);
       }
     });

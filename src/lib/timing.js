@@ -21,7 +21,7 @@ module.exports = function(proto) {
  * @returns {Object}
  */
 function time(name, action) {
-  if (!this.timings) {
+  if (this.timings === undefined) {
     this.timings = {};
   }
 
@@ -52,7 +52,7 @@ function time(name, action) {
       tempName = `_${name}`;
 
       // "start"
-      if (!this.timings[tempName]) {
+      if (this.timings[tempName] === undefined) {
         this.timings[tempName] = uname;
         marky.mark(uname);
         return this;

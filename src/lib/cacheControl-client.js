@@ -20,7 +20,7 @@ module.exports = function(proto) {
 function cacheControl(maxage, upstream) {
   const duration = cacheControlDuration(maxage, upstream);
 
-  if (duration) {
+  if (duration > 0) {
     clock.timeout(
       duration * 1000,
       () => {
