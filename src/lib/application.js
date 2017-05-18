@@ -47,10 +47,10 @@ module.exports = function application(id, port, express, options) {
   app.set('render', render && render(app));
 
   // Register middleware/params stack
-  if (middleware !== undefined && middleware.register !== undefined) {
+  if (middleware != null && middleware.register != null) {
     middleware.register(app);
   }
-  if (params !== undefined && params.register !== undefined) {
+  if (params != null && params.register != null) {
     params.register(app);
   }
 
@@ -58,7 +58,7 @@ module.exports = function application(id, port, express, options) {
   for (const id in pages) {
     const { pageFactory, routes } = pages[id];
 
-    if (routes !== undefined && routes.length > 0) {
+    if (routes != null && routes.length > 0) {
       const page = pageFactory(id, app);
 
       pages[id] = page;
@@ -71,7 +71,7 @@ module.exports = function application(id, port, express, options) {
   }
 
   // Register error middleware stack
-  if (middleware !== undefined && middleware.registerError !== undefined) {
+  if (middleware != null && middleware.registerError != null) {
     middleware.registerError(app);
   }
 
