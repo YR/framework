@@ -199,7 +199,7 @@ function setPage(req, res, done) {
     });
     // Trigger prerender if handle is async and not a reload
     if (!req.reloaded) {
-      clock.immediate(() => {
+      clock.frame(() => {
         // Guard against possible reassignment to new page
         if (pending == null && currentPage === current && currentPage.containsState(HANDLING)) {
           res.write();
