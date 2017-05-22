@@ -10,7 +10,7 @@
     "body-parser": "1.17.2",
     "cookie-parser": "1.4.3",
     "debug": "2.x.x",
-    "helmet": "3.6.0",
+    "helmet": "3.6.1",
     "inline-source": "5.2.x",
     "marky": "1.2.0",
     "ms": "2.0.0",
