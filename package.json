@@ -6,7 +6,7 @@
   "dependencies": {
     "@yr/clock": "2.0.x",
     "@yr/express": "4.15.2",
-    "@yr/express-client": "3.1.x",
+    "@yr/express-client": "3.2.x",
     "body-parser": "1.17.2",
     "cookie-parser": "1.4.3",
     "debug": "2.x.x",
