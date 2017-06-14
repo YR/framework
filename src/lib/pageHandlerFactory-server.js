@@ -22,6 +22,7 @@ module.exports = function pageHandler(page) {
    * @param {Function} next
    */
   return function pageHandle(req, res, next) {
+    res.time('route');
     page.state = 0;
     page.debug('initing');
     page.appendState(INITING);

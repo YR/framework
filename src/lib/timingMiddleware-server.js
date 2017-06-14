@@ -9,9 +9,9 @@ const onFinished = require('on-finished');
 module.exports = function() {
   return function timingMiddleware(req, res, next) {
     res.time('response');
+    res.time('route');
     onFinished(res, (err, res) => {
       res.time('response');
-      // console.log(res.timings)
     });
     next();
   };
