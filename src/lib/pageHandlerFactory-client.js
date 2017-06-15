@@ -33,6 +33,7 @@ module.exports = function pageHandler(page) {
    * @param {Function} next
    */
   return function pageHandle(req, res, next) {
+    res.time('route');
     pending = page;
     // Enable partial render support
     res.write = write(page, req, res);

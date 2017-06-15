@@ -7,6 +7,7 @@
 module.exports = function() {
   return function timingMiddleware(req, res, next) {
     res.time('response');
+    res.time('route');
     res.once('finish', finished, res);
     res.once('close', finished, res);
     next();
