@@ -41,7 +41,7 @@
     "babel-plugin-transform-es5-property-mutators": "6.24.1",
     "babel-plugin-transform-exponentiation-operator": "6.24.1",
     "babel-plugin-transform-object-rest-spread": "6.23.0",
-    "buddy": "6.13.6",
+    "buddy": "6.13.x",
     "expect.js": "*",
     "mocha": "*",
     "supertest": "*"
