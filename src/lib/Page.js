@@ -62,9 +62,11 @@ module.exports = class Page {
 
   /**
    * Initialize
+   * @param {Request} req
+   * @param {Response} res
    * @param {Function} done
    */
-  init(done) {
+  init(req, res, done) {
     this.initialised = true;
     if (done != null) {
       done();

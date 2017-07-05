@@ -85,7 +85,7 @@ function changePage(req, res, done) {
   pendingPage.debug('initing');
   pendingPage.appendState(INITING);
   res.time('init');
-  pendingPage.init(err => {
+  pendingPage.init(req, res, err => {
     res.time('init');
     pendingPage.debug('inited');
     pendingPage.appendState(-INITING, INITED);

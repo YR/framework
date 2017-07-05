@@ -26,7 +26,7 @@ module.exports = function pageHandler(page) {
     page.state = 0;
     page.debug('initing');
     page.appendState(INITING);
-    page.init(err => {
+    page.init(req, res, err => {
       page.debug('inited');
       page.appendState(-INITING, INITED);
       if (err != null) {

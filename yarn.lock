@@ -3,8 +3,8 @@
 
 
 "@yr/clock@2.0.x":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@yr/clock/-/clock-2.0.2.tgz#c35397b8c5d69d8c50765e7510a5ab0f07deecdc"
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@yr/clock/-/clock-2.0.3.tgz#51183c9f150449d87d590ba90a0e2f120bef5ec3"
   dependencies:
     debug "2.x.x"
     performance-now "2.1.0"
@@ -771,12 +771,12 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000696"
-  resolved "https://registry.yarnpkg.com/caniuse-db/-/caniuse-db-1.0.30000696.tgz#e71f5c61e1f96c7a3af4e791ac5db55e11737604"
+  version "1.0.30000697"
+  resolved "https://registry.yarnpkg.com/caniuse-db/-/caniuse-db-1.0.30000697.tgz#20ce6a9ceeef4ef4a15dc8e80f2e8fb9049e8d77"
 
 caniuse-lite@^1.0.30000670, caniuse-lite@^1.0.30000684:
-  version "1.0.30000696"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000696.tgz#30f2695d2a01a0dfd779a26ab83f4d134b3da5cc"
+  version "1.0.30000697"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000697.tgz#125fb00604b63fbb188db96a667ce2922dcd6cdd"
 
 caseless@~0.12.0:
   version "0.12.0"

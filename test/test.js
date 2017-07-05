@@ -260,10 +260,10 @@ describe('framework', () => {
       let called;
 
       class BasePage extends Page {
-        init(done) {
+        init(req, res, done) {
           // console.log(this.id, 'init', this.state);
           called.push(`init${this.id}`);
-          super.init(done);
+          super.init(req, res, done);
         }
         handle(req, res, done) {
           // console.log(this.id, 'handle', this.state);
@@ -350,10 +350,10 @@ describe('framework', () => {
           }
         }
         class P2 extends BasePage {
-          init(done) {
+          init(req, res, done) {
             setTimeout(
               () => {
-                super.init(done);
+                super.init(req, res, done);
               },
               10
             );
@@ -389,10 +389,10 @@ describe('framework', () => {
       });
       it('should handle another page request while unhandling an existing page request', done => {
         class P extends BasePage {
-          init(done) {
+          init(req, res, done) {
             setTimeout(
               () => {
-                super.init(done);
+                super.init(req, res, done);
               },
               10
             );
@@ -444,10 +444,10 @@ describe('framework', () => {
           }
         }
         class P2 extends BasePage {
-          init(done) {
+          init(req, res, done) {
             setTimeout(
               () => {
-                super.init(done);
+                super.init(req, res, done);
               },
               10
             );
