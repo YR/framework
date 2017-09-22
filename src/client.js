@@ -25,7 +25,7 @@ timing(express.response);
  *  - {DataStore} settings
  * @returns {Express}
  */
-module.exports = function server(id, options) {
+module.exports = function client(id, options) {
   if (options.pageHandlerFactory === undefined) {
     options.pageHandlerFactory = pageHandlerFactory;
   }

@@ -2,7 +2,7 @@
 
 const debugFactory = require('debug');
 
-const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render', 'sourcepath'];
+const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render'];
 
 /**
  * Retrieve and initialise server instance
@@ -17,7 +17,6 @@ const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render', 'sourcepat
  *  - {Object} params
  *  - {Function} render
  *  - {DataStore} settings
- *  - {String} sourcepath
  *  - {Object} templates
  * @returns {Express}
  */
