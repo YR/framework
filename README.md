@@ -138,15 +138,20 @@ The `Page` class describes the default behaviour of site pages.
 
 **debug: Function** A [debug](https://github.com/visionmedia/debug) instance, namespaced with `id`.
 
+**initialised: Boolean** Flag indicating whether `init()` has been called.
+
 Pages are subject to the following lifecycle: `init -> handle -> render -> unrender -> unhandle`
 
-**init(req: Request, res: Response[, done: Function])**
+**init(req: Request, res: Response, done: Function)**
 
-**handle(req: Request, res: Response[, done: Function])**
+**handle(req: Request, res: Response, done: Function)**
 
-**render(req: Request, res: Response[, done: Function])**
+**render(req: Request, res: Response, done: Function)**
 
-**unrender(req: Request, res: Response[, done: Function])**
+**unrender(req: Request, res: Response, done: Function)**
 
-**unhandle(req: Request, res: Response[, done: Function])**
+**unhandle(req: Request, res: Response, done: Function)**
 
+### Middleware
+
+### Response extensions
