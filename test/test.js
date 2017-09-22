@@ -1,15 +1,16 @@
 'use strict';
 
+const { expect } = require('chai');
 const cacheControlClient = require('../src/lib/cacheControl-client');
 const cacheControlServer = require('../src/lib/cacheControl-server');
 const clientPageHandlerFactory = require('../src/lib/pageHandlerFactory-client');
-const expect = require('expect.js');
 const fooPage = require('./fixtures/foo');
 const onFinished = require('on-finished');
 const Page = require('../src/lib/Page');
 const rerender = require('../src/lib/rerender');
 const request = require('supertest');
 const server = require('../src/server');
+
 let app, req, res;
 
 describe('framework', () => {
@@ -123,19 +124,19 @@ describe('framework', () => {
           res.cacheControl(true);
           expect.fail();
         } catch (err) {
-          expect(err).to.be.an(Error);
+          expect(err).to.be.an('error');
         }
         try {
           res.cacheControl('');
           expect.fail();
         } catch (err) {
-          expect(err).to.be.an(Error);
+          expect(err).to.be.an('error');
         }
         try {
           res.cacheControl('foo');
           expect.fail();
         } catch (err) {
-          expect(err).to.be.an(Error);
+          expect(err).to.be.an('error');
         }
       });
     });
@@ -165,13 +166,15 @@ describe('framework', () => {
           }
         });
         app.listen();
-        request(app).get('/foo').end((err, res) => {
-          if (err) {
-            return void done(err);
-          }
-          expect(res.text).to.equal('foo');
-          done();
-        });
+        request(app)
+          .get('/foo')
+          .end((err, res) => {
+            if (err) {
+              return void done(err);
+            }
+            expect(res.text).to.equal('foo');
+            done();
+          });
       });
       it('should generate response id', done => {
         const pageFactory = (id, app) => {
@@ -193,12 +196,14 @@ describe('framework', () => {
           }
         });
         app.listen();
-        request(app).get('/foo').end((err, res) => {
-          if (err) {
-            return void done(err);
-          }
-          done();
-        });
+        request(app)
+          .get('/foo')
+          .end((err, res) => {
+            if (err) {
+              return void done(err);
+            }
+            done();
+          });
       });
       it('should generate response timings', done => {
         class P extends Page {
@@ -206,20 +211,14 @@ describe('framework', () => {
             res.write('f');
             res.write('o');
             res.write('o');
-            setTimeout(
-              () => {
-                super.handle(req, res, done);
-              },
-              50
-            );
+            setTimeout(() => {
+              super.handle(req, res, done);
+            }, 50);
           }
           render(req, res, done) {
-            setTimeout(
-              () => {
-                super.render(req, res, done);
-              },
-              50
-            );
+            setTimeout(() => {
+              super.render(req, res, done);
+            }, 50);
           }
         }
         const pageFactory = (id, app) => {
@@ -244,13 +243,15 @@ describe('framework', () => {
           }
         });
         app.listen();
-        request(app).get('/foo').end((err, res) => {
-          if (err) {
-            return void done(err);
-          }
-          expect(res.text).to.equal('foo');
-          done();
-        });
+        request(app)
+          .get('/foo')
+          .end((err, res) => {
+            if (err) {
+              return void done(err);
+            }
+            expect(res.text).to.equal('foo');
+            done();
+          });
       });
     });
   });
@@ -341,22 +342,16 @@ describe('framework', () => {
       it('should asynchronously unhandle an existing page request', done => {
         class P1 extends BasePage {
           unhandle(req, res, done) {
-            setTimeout(
-              () => {
-                super.unhandle(req, res, done);
-              },
-              20
-            );
+            setTimeout(() => {
+              super.unhandle(req, res, done);
+            }, 20);
           }
         }
         class P2 extends BasePage {
           init(req, res, done) {
-            setTimeout(
-              () => {
-                super.init(req, res, done);
-              },
-              10
-            );
+            setTimeout(() => {
+              super.init(req, res, done);
+            }, 10);
           }
         }
 
@@ -367,35 +362,29 @@ describe('framework', () => {
 
         handler1(req, res, done);
         handler2(req, res, done);
-        setTimeout(
-          () => {
-            expect(called).to.eql([
-              'init1',
-              'handle1',
-              'render1',
-              'unrender1',
-              'init2',
-              'unhandle1',
-              'handle2',
-              'render2'
-            ]);
-            expect(app.page).to.equal(page2);
-            expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-            expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
-            done();
-          },
-          50
-        );
+        setTimeout(() => {
+          expect(called).to.eql([
+            'init1',
+            'handle1',
+            'render1',
+            'unrender1',
+            'init2',
+            'unhandle1',
+            'handle2',
+            'render2'
+          ]);
+          expect(app.page).to.equal(page2);
+          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
+          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          done();
+        }, 50);
       });
       it('should handle another page request while unhandling an existing page request', done => {
         class P extends BasePage {
           init(req, res, done) {
-            setTimeout(
-              () => {
-                super.init(req, res, done);
-              },
-              10
-            );
+            setTimeout(() => {
+              super.init(req, res, done);
+            }, 10);
           }
         }
 
@@ -410,47 +399,38 @@ describe('framework', () => {
         handler2(req, res, done);
         handler3(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1']);
-        setTimeout(
-          () => {
-            expect(called).to.eql([
-              'init1',
-              'handle1',
-              'render1',
-              'unrender1',
-              'unhandle1',
-              'init2',
-              'init3',
-              'handle3',
-              'render3'
-            ]);
-            expect(app.page).to.equal(page3);
-            expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-            expect(page2.state).to.equal(Page.INITED);
-            expect(page3.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
-            done();
-          },
-          50
-        );
+        setTimeout(() => {
+          expect(called).to.eql([
+            'init1',
+            'handle1',
+            'render1',
+            'unrender1',
+            'unhandle1',
+            'init2',
+            'init3',
+            'handle3',
+            'render3'
+          ]);
+          expect(app.page).to.equal(page3);
+          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
+          expect(page2.state).to.equal(Page.INITED);
+          expect(page3.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          done();
+        }, 50);
       });
       it('should handle another page request while handling a page request', done => {
         class P1 extends BasePage {
           handle(req, res, done) {
-            setTimeout(
-              () => {
-                super.handle(req, res, done);
-              },
-              20
-            );
+            setTimeout(() => {
+              super.handle(req, res, done);
+            }, 20);
           }
         }
         class P2 extends BasePage {
           init(req, res, done) {
-            setTimeout(
-              () => {
-                super.init(req, res, done);
-              },
-              10
-            );
+            setTimeout(() => {
+              super.init(req, res, done);
+            }, 10);
           }
         }
 
@@ -462,26 +442,20 @@ describe('framework', () => {
         handler1(req, res, done);
         handler2(req, res, done);
         expect(called).to.eql(['init1', 'unhandle1']);
-        setTimeout(
-          () => {
-            expect(called).to.eql(['init1', 'unhandle1', 'init2', 'handle2', 'render2', 'handle1']);
-            expect(page1.state).to.equal(Page.INITED | Page.UNHANDLED);
-            expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
-            expect(app.page).to.equal(page2);
-            done();
-          },
-          50
-        );
+        setTimeout(() => {
+          expect(called).to.eql(['init1', 'unhandle1', 'init2', 'handle2', 'render2', 'handle1']);
+          expect(page1.state).to.equal(Page.INITED | Page.UNHANDLED);
+          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          expect(app.page).to.equal(page2);
+          done();
+        }, 50);
       });
       it('should prerender during async handling', done => {
         class P extends BasePage {
           handle(req, res, done) {
-            setTimeout(
-              () => {
-                super.handle(req, res, done);
-              },
-              20
-            );
+            setTimeout(() => {
+              super.handle(req, res, done);
+            }, 20);
           }
         }
 
@@ -490,24 +464,18 @@ describe('framework', () => {
 
         handler(req, res, done);
         expect(called).to.eql(['init1']);
-        setTimeout(
-          () => {
-            expect(called).to.eql(['init1', 'render1', 'handle1', 'render1']);
-            done();
-          },
-          50
-        );
+        setTimeout(() => {
+          expect(called).to.eql(['init1', 'render1', 'handle1', 'render1']);
+          done();
+        }, 50);
       });
       it('should allow for res.write() during async handling', done => {
         class P extends BasePage {
           handle(req, res, done) {
             res.write();
-            setTimeout(
-              () => {
-                super.handle(req, res, done);
-              },
-              20
-            );
+            setTimeout(() => {
+              super.handle(req, res, done);
+            }, 20);
           }
         }
 
@@ -516,13 +484,10 @@ describe('framework', () => {
 
         handler(req, res, done);
         expect(called).to.eql(['init1', 'render1']);
-        setTimeout(
-          () => {
-            expect(called).to.eql(['init1', 'render1', 'render1', 'handle1', 'render1']);
-            done();
-          },
-          50
-        );
+        setTimeout(() => {
+          expect(called).to.eql(['init1', 'render1', 'render1', 'handle1', 'render1']);
+          done();
+        }, 50);
       });
       it('should allow for page rerender', done => {
         const page = new BasePage('1', app);
@@ -530,14 +495,11 @@ describe('framework', () => {
 
         handler(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1']);
-        setTimeout(
-          () => {
-            app.rerender();
-            expect(called).to.eql(['init1', 'handle1', 'render1', 'render1']);
-            done();
-          },
-          50
-        );
+        setTimeout(() => {
+          app.rerender();
+          expect(called).to.eql(['init1', 'handle1', 'render1', 'render1']);
+          done();
+        }, 50);
       });
     });
 
@@ -556,33 +518,24 @@ describe('framework', () => {
 
       it('should not trigger a reload when no-cache', done => {
         res.cacheControl(false);
-        setTimeout(
-          () => {
-            expect(res.app.reloaded).to.eql(false);
-            done();
-          },
-          100
-        );
+        setTimeout(() => {
+          expect(res.app.reloaded).to.eql(false);
+          done();
+        }, 100);
       });
       it('should trigger a reload when passed a String', done => {
         res.cacheControl('1s');
-        setTimeout(
-          () => {
-            expect(res.app.reloaded).to.eql(true);
-            done();
-          },
-          1100
-        );
+        setTimeout(() => {
+          expect(res.app.reloaded).to.eql(true);
+          done();
+        }, 1100);
       });
       it('should trigger a reload when passed a Number', done => {
         res.cacheControl(1);
-        setTimeout(
-          () => {
-            expect(res.app.reloaded).to.eql(true);
-            done();
-          },
-          1100
-        );
+        setTimeout(() => {
+          expect(res.app.reloaded).to.eql(true);
+          done();
+        }, 1100);
       });
     });
   });

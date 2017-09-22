@@ -1,7 +1,6 @@
 .DS_Store
 .git*
 test
-docs
 package-lock.json
 yarn.lock
 .travis.yml
