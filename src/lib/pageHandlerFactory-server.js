@@ -23,7 +23,7 @@ module.exports = function pageHandler(page) {
    */
   return function pageHandle(req, res, next) {
     res.time('route');
-    page.state = 0;
+    page._state = 0;
     page.debug('initing');
     page.appendState(INITING);
     page.init(req, res, err => {
@@ -43,7 +43,7 @@ module.exports = function pageHandler(page) {
           return void next(err);
         }
         // Prevent rendering unhandled/aborted
-        if (page.state === INITED | HANDLED) {
+        if (page._state === INITED | HANDLED) {
           page.debug('rendering');
           page.appendState(RENDERING);
           res.time('render');

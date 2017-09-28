@@ -262,27 +262,27 @@ describe('framework', () => {
 
       class BasePage extends Page {
         init(req, res, done) {
-          // console.log(this.id, 'init', this.state);
+          // console.log(this.id, 'init', this._state);
           called.push(`init${this.id}`);
           super.init(req, res, done);
         }
         handle(req, res, done) {
-          // console.log(this.id, 'handle', this.state);
+          // console.log(this.id, 'handle', this._state);
           called.push(`handle${this.id}`);
           super.handle(req, res, done);
         }
         render(req, res, done) {
-          // console.log(this.id, 'render', this.state);
+          // console.log(this.id, 'render', this._state);
           called.push(`render${this.id}`);
           super.render(req, res, done);
         }
         unrender(req, res, done) {
-          // console.log(this.id, 'unrender', this.state);
+          // console.log(this.id, 'unrender', this._state);
           called.push(`unrender${this.id}`);
           super.unrender(req, res, done);
         }
         unhandle(req, res, done) {
-          // console.log(this.id, 'unhandle', this.state);
+          // console.log(this.id, 'unhandle', this._state);
           called.push(`unhandle${this.id}`);
           super.unhandle(req, res, done);
         }
@@ -322,7 +322,7 @@ describe('framework', () => {
 
         handler(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1']);
-        expect(page.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+        expect(page._state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
         done();
       });
       it('should unhandle an existing page request', done => {
@@ -335,8 +335,8 @@ describe('framework', () => {
         expect(called).to.eql(['init1', 'handle1', 'render1']);
         handler2(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1', 'init2', 'handle2', 'render2']);
-        expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-        expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+        expect(page1._state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
+        expect(page2._state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
         done();
       });
       it('should asynchronously unhandle an existing page request', done => {
@@ -374,8 +374,8 @@ describe('framework', () => {
             'render2'
           ]);
           expect(app.page).to.equal(page2);
-          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          expect(page1._state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
+          expect(page2._state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
           done();
         }, 50);
       });
@@ -412,9 +412,9 @@ describe('framework', () => {
             'render3'
           ]);
           expect(app.page).to.equal(page3);
-          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-          expect(page2.state).to.equal(Page.INITED);
-          expect(page3.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          expect(page1._state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
+          expect(page2._state).to.equal(Page.INITED);
+          expect(page3._state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
           done();
         }, 50);
       });
@@ -444,8 +444,8 @@ describe('framework', () => {
         expect(called).to.eql(['init1', 'unhandle1']);
         setTimeout(() => {
           expect(called).to.eql(['init1', 'unhandle1', 'init2', 'handle2', 'render2', 'handle1']);
-          expect(page1.state).to.equal(Page.INITED | Page.UNHANDLED);
-          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          expect(page1._state).to.equal(Page.INITED | Page.UNHANDLED);
+          expect(page2._state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
           expect(app.page).to.equal(page2);
           done();
         }, 50);

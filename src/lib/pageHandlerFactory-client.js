@@ -47,14 +47,16 @@ module.exports = function pageHandler(page) {
   };
 };
 
-/**
- * Reset current/pending page state
- * Private: this is only for testing!
- */
-module.exports.__reset = function() {
-  current = null;
-  pending = null;
-};
+if (process.env.NODE_ENV !== 'production') {
+  /**
+   * Reset current/pending page state
+   * Private: this is only for testing!
+   */
+  module.exports.__reset = function() {
+    current = null;
+    pending = null;
+  };
+}
 
 /**
  * Change page
@@ -81,7 +83,7 @@ function changePage(req, res, done) {
     });
   }
 
-  pendingPage.state = 0;
+  pendingPage._state = 0;
   pendingPage.debug('initing');
   pendingPage.appendState(INITING);
   res.time('init');
@@ -169,7 +171,7 @@ function unhandlePage(page, req, res, done) {
 function setPage(req, res, done) {
   const currentPage = pending;
 
-  if (currentPage.state === INITED) {
+  if (currentPage._state === INITED) {
     current = currentPage;
     pending = null;
     res.app.set('page', currentPage);
@@ -184,8 +186,8 @@ function setPage(req, res, done) {
         return void done(err);
       }
       // Guard against possible reassignment to new page
-      if (pending != null || currentPage !== current || currentPage.state !== INITED) {
-        currentPage.debug('aborting render', currentPage.state);
+      if (pending != null || currentPage !== current || currentPage._state !== INITED) {
+        currentPage.debug('aborting render', currentPage._state);
         return void done();
       }
       currentPage.debug('rendering');
