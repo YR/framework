@@ -35,20 +35,29 @@ function rerender(done) {
 
   const { req, res } = this.getCurrentContext();
 
-  renderPage(page, req, res, done);
+  renderPage(this, page, req, res, done);
 }
 
 /**
  * Render 'page'
+ * @param {Express} app
  * @param {Page} page
  * @param {Request} req
  * @param {Response} res
  * @param {Function} done
  */
-function renderPage(page, req, res, done) {
-  page.debug('rerendering');
-  page.appendState(-RENDERED, RENDERING);
+function renderPage(app, page, req, res, done) {
   clock.frame(() => {
+    // Cancel rerendering if a new page has been rendered since this rerender was scheduled
+    const currentPage = app.get('page');
+    if (currentPage !== page) {
+      page.debug('rerender cancelled');
+      return;
+    }
+
+    page.debug('rerendering');
+    page.appendState(-RENDERED, RENDERING);
+
     res.time('rerender');
     page.render(req, res, err => {
       res.time('rerender');
@@ -59,7 +68,7 @@ function renderPage(page, req, res, done) {
 
         pending = undefined;
         if (shouldRender) {
-          return renderPage(page, req, res, done);
+          return renderPage(app, page, req, res, done);
         }
       }
       if (done != null) {
