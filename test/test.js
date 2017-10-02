@@ -519,7 +519,7 @@ describe('framework', () => {
           app.rerender();
           app.rerender();
           setTimeout(() => {
-            expect(called).to.eql(['init1', 'handle1', 'render1', 'render1', 'render1']);
+            expect(called).to.eql(['init1', 'handle1', 'render1', 'render1', 'render1', 'render1']);
             done();
           }, 100);
         }, 50);
