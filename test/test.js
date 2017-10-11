@@ -502,28 +502,6 @@ describe('framework', () => {
           }, 10);
         }, 50);
       });
-      it('should queue multiple page rerenders', done => {
-        class P extends BasePage {
-          render(req, res, done) {
-            setTimeout(() => {
-              super.render(req, res, done);
-            }, 10);
-          }
-        }
-        const page = new P('1', app);
-        const handler = clientPageHandlerFactory(page);
-
-        handler(req, res, done);
-        setTimeout(() => {
-          app.rerender();
-          app.rerender();
-          app.rerender();
-          setTimeout(() => {
-            expect(called).to.eql(['init1', 'handle1', 'render1', 'render1', 'render1', 'render1']);
-            done();
-          }, 100);
-        }, 50);
-      });
     });
 
     describe('cacheControl', () => {
