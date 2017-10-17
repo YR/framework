@@ -1,14 +1,5 @@
 'use strict';
 
-const {
-  INITING,
-  INITED,
-  HANDLING,
-  HANDLED,
-  RENDERING,
-  RENDERED
-} = require('./Page');
-
 /**
  * Handler factory for 'page'
  * @param {Page} page
@@ -23,34 +14,27 @@ module.exports = function pageHandler(page) {
    */
   return function pageHandle(req, res, next) {
     res.time('route');
-    page._state = 0;
     page.debug('initing');
-    page.appendState(INITING);
     page.init(req, res, err => {
       page.debug('inited');
-      page.appendState(-INITING, INITED);
       if (err != null) {
         return void next(err);
       }
       page.debug('handling');
-      page.appendState(HANDLING);
       res.time('handle');
       page.handle(req, res, err => {
         res.time('handle');
         page.debug('handled');
-        page.appendState(-HANDLING, HANDLED);
         if (err != null) {
           return void next(err);
         }
-        // Prevent rendering unhandled/aborted
-        if (page._state === INITED | HANDLED) {
+        // Prevent rendering aborted
+        if (!req.aborted || !res.finished) {
           page.debug('rendering');
-          page.appendState(RENDERING);
           res.time('render');
           page.render(req, res, err => {
             res.time('render');
             page.debug('rendered');
-            page.appendState(-RENDERING, RENDERED);
             if (err != null) {
               return void next(err);
             }
