@@ -10,9 +10,9 @@
     performance-now "2.1.0"
     raf "3.4.0"
 
-"@yr/express-client@3.2.x":
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/@yr/express-client/-/express-client-3.2.2.tgz#ad1c95c16ab7c0b08ce728b341a81b858f05e55b"
+"@yr/express-client@3.3.x":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@yr/express-client/-/express-client-3.3.0.tgz#92ed47aedcf527a90cfa7d78d26a4682548f58e6"
   dependencies:
     "@yr/url-utils" "2.3.x"
     cookie "0.3.x"
