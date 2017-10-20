@@ -83,7 +83,7 @@ function changePage(req, res, done) {
     });
   }
 
-  pendingPage._state = 0;
+  pendingPage.state = 0;
   pendingPage.debug('initing');
   pendingPage.appendState(INITING);
   res.time('init');
@@ -171,7 +171,7 @@ function unhandlePage(page, req, res, done) {
 function setPage(req, res, done) {
   const currentPage = pending;
 
-  if (currentPage._state === INITED) {
+  if (currentPage.state === INITED) {
     current = currentPage;
     pending = null;
     res.app.set('page', currentPage);
@@ -186,8 +186,8 @@ function setPage(req, res, done) {
         return void done(err);
       }
       // Guard against possible reassignment to new page
-      if (pending != null || currentPage !== current || currentPage._state !== INITED) {
-        currentPage.debug('aborting render', currentPage._state);
+      if (pending != null || currentPage !== current || currentPage.state !== INITED) {
+        currentPage.debug('aborting render', currentPage.state);
         return void done();
       }
       currentPage.debug('rendering');

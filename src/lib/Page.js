@@ -26,7 +26,7 @@ module.exports = class Page {
     this.debug = debugFactory(`${app.get('id')}:${id}`);
     this.id = id;
     this.initialised = false;
-    this._state = 0;
+    this.state = 0;
   }
 
   /**
@@ -38,9 +38,9 @@ module.exports = class Page {
     for (let i = 0, n = flags.length; i < n; i++) {
       // Remove if negative
       if (flags[i] < 0) {
-        this._state &= ~(flags[i] * (-1));
+        this.state &= ~(flags[i] * -1);
       } else {
-        this._state |= flags[i];
+        this.state |= flags[i];
       }
     }
   }
@@ -53,7 +53,7 @@ module.exports = class Page {
    */
   containsState(...flags) {
     for (let i = 0, n = flags.length; i < n; i++) {
-      if ((flags[i] < 0 && this._state & flags[i] * (-1)) || (flags[i] > 0 && !(this._state & flags[i]))) {
+      if ((flags[i] < 0 && this.state & (flags[i] * -1)) || (flags[i] > 0 && !(this.state & flags[i]))) {
         return false;
       }
     }
