@@ -1,7 +1,7 @@
 {
   "name": "@yr/framework",
   "description": "A universal application framework based on Express.js",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "@yr/clock": "2.0.x",
@@ -14,6 +14,7 @@
     "inline-source": "5.2.5",
     "ms": "2.0.0",
     "on-finished": "2.3.x",
+    "performance-now": "2.1.0",
     "uuid": "3.1.0"
   },
   "devDependencies": {
@@ -55,10 +56,7 @@
     "prepublish": "buddy build",
     "test": "NODE_ENV=test mocha test/test.js --reporter spec --bail"
   },
-  "browser": {
-    "./src/server.js": "./client.js",
-    "perf_hooks": false
-  },
+  "browser": "./client.js",
   "buddy": {
     "build": [
       {

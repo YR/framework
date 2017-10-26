@@ -12,8 +12,8 @@ module.exports = {
    * @param {Express} app
    */
   register(app) {
-    app.use(timingMiddleware());
     app.use(idMiddleware());
+    app.use(timingMiddleware());
     app.use(helmet.frameguard());
     app.use(helmet.hidePoweredBy());
     app.use(helmet.ieNoOpen());

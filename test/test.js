@@ -94,9 +94,6 @@ describe('framework', () => {
         res.id = '1234';
         timing(res);
       });
-      afterEach(() => {
-        res.time.clear();
-      });
 
       it('should register timing for an event with duration', () => {
         res.time('foo', 500);
@@ -116,25 +113,6 @@ describe('framework', () => {
         res.time('foo');
         expect(res.timings).to.have.property('foo');
         expect(res.timings.foo.duration).to.be.within(200, 250);
-      });
-      it('should clear timing for function execution', () => {
-        res.time('foo', () => {
-          exec('sleep 0.2');
-        });
-        const entries = performance.getEntries();
-        res.time.clear();
-        const entries2 = performance.getEntries();
-        expect(entries.filter(entry => entry.name.endsWith('1234::foo'))).to.have.length(3);
-        expect(entries2.filter(entry => entry.name.endsWith('1234::foo'))).to.have.length(0);
-      });
-      it('should clear timing for an event', () => {
-        res.time('foo');
-        res.time('foo');
-        const entries = performance.getEntries();
-        res.time.clear();
-        const entries2 = performance.getEntries();
-        expect(entries.filter(entry => entry.name.endsWith('1234::foo'))).to.have.length(3);
-        expect(entries2.filter(entry => entry.name.endsWith('1234::foo'))).to.have.length(0);
       });
     });
 

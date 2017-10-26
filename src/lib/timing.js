@@ -1,8 +1,8 @@
 'use strict';
 
-// For the client, 'perf_hooks' is disabled in package.json 'browser' field,
-// and we use the 'performance' object defined globally
-const { performance = window.performance } = require('perf_hooks');
+const now = require('performance-now');
+
+const hasPerformance = typeof performance !== 'undefined';
 
 /**
  * Patch 'proto' with time behaviour
@@ -10,7 +10,6 @@ const { performance = window.performance } = require('perf_hooks');
  */
 module.exports = function(proto) {
   proto.time = time;
-  proto.time.clear = clear.bind(proto);
 };
 
 /**
@@ -20,45 +19,55 @@ module.exports = function(proto) {
  * @returns {Object}
  */
 function time(name, action) {
-  if (performance == null) {
-    return this;
-  }
-
   if (this.timings === undefined) {
     this.timings = {};
   }
 
   const type = typeof action;
   const uname = `${this.id}::${name}`;
-  let entry, tempName;
+  let entry, startTime, tempName;
 
   switch (type) {
     // Handle passing duration
     case 'number':
       entry = {
-        startTime: Date.now() - action,
+        startTime: now() - action,
         name,
-        duration: action,
-        entryType: 'measure'
+        duration: action
       };
       break;
     // Handle passing function
     case 'function':
-      performance.mark(`start::${uname}`);
+      startTime = now();
+      mark(`start::${uname}`);
       action();
-      entry = stop(uname);
+      mark(`end::${uname}`);
+      measure(uname, `start::${uname}`, `end::${uname}`);
+      entry = {
+        startTime,
+        name,
+        duration: now() - startTime
+      };
       break;
     default:
       tempName = `_${name}`;
 
       // "start"
       if (this.timings[tempName] === undefined) {
-        this.timings[tempName] = uname;
-        performance.mark(`start::${uname}`);
+        this.timings[tempName] = now();
+        mark(`start::${uname}`);
         return this;
       }
 
-      entry = stop(this.timings[tempName]);
+      startTime = this.timings[tempName];
+      mark(`end::${uname}`);
+      measure(uname, `start::${uname}`, `end::${uname}`);
+      entry = {
+        startTime,
+        name,
+        duration: now() - startTime
+      };
+
       delete this.timings[tempName];
   }
 
@@ -67,33 +76,14 @@ function time(name, action) {
   return this;
 }
 
-/**
- * Clear timings from performance timeline
- * @returns {Object}
- */
-function clear() {
-  if (performance != null) {
-    for (const name in this.timings) {
-      performance.clearMarks(`start::${this.id}::${name}`);
-      performance.clearMarks(`end::${this.id}::${name}`);
-      performance.clearMeasures(`${this.id}::${name}`);
-    }
+function mark(name) {
+  if (hasPerformance) {
+    performance.mark(name);
   }
-
-  return this;
 }
 
-/**
- * Retrieve entry for measured event with 'uname'
- * Borrowed from https://github.com/nolanlawson/marky
- * @param {String} uname
- * @returns {Object}
- */
-function stop(uname) {
-  performance.mark(`end::${uname}`);
-  performance.measure(uname, `start::${uname}`, `end::${uname}`);
-
-  const entries = performance.getEntriesByName(uname);
-
-  return entries[entries.length - 1];
+function measure(name, startMark, endMark) {
+  if (hasPerformance) {
+    performance.measure(name, startMark, endMark);
+  }
 }
