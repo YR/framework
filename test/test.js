@@ -1,6 +1,8 @@
 'use strict';
 
+const { execSync: exec } = require('child_process');
 const { expect } = require('chai');
+const { performance } = require('perf_hooks');
 const cacheControlClient = require('../src/lib/cacheControl-client');
 const cacheControlServer = require('../src/lib/cacheControl-server');
 const clientPageHandlerFactory = require('../src/lib/pageHandlerFactory-client');
@@ -11,6 +13,7 @@ const rerender = require('../src/lib/rerender');
 const request = require('supertest');
 const server = require('../src/server');
 const serverPageHandlerFactory = require('../src/lib/pageHandlerFactory-server');
+const timing = require('../src/lib/timing');
 
 let app, called, req, res;
 
@@ -86,6 +89,55 @@ describe('framework', () => {
   });
 
   describe('server', () => {
+    describe('timing', () => {
+      beforeEach(() => {
+        res.id = '1234';
+        timing(res);
+      });
+      afterEach(() => {
+        res.time.clear();
+      });
+
+      it('should register timing for an event with duration', () => {
+        res.time('foo', 500);
+        expect(res.timings).to.have.property('foo');
+        expect(res.timings.foo).to.have.property('duration', 500);
+      });
+      it('should measure timing for function execution', () => {
+        res.time('foo', () => {
+          exec('sleep 0.2');
+        });
+        expect(res.timings).to.have.property('foo');
+        expect(res.timings.foo.duration).to.be.within(200, 250);
+      });
+      it('should measure timing for an event', () => {
+        res.time('foo');
+        exec('sleep 0.2');
+        res.time('foo');
+        expect(res.timings).to.have.property('foo');
+        expect(res.timings.foo.duration).to.be.within(200, 250);
+      });
+      it('should clear timing for function execution', () => {
+        res.time('foo', () => {
+          exec('sleep 0.2');
+        });
+        const entries = performance.getEntries();
+        res.time.clear();
+        const entries2 = performance.getEntries();
+        expect(entries.filter(entry => entry.name.endsWith('1234::foo'))).to.have.length(3);
+        expect(entries2.filter(entry => entry.name.endsWith('1234::foo'))).to.have.length(0);
+      });
+      it('should clear timing for an event', () => {
+        res.time('foo');
+        res.time('foo');
+        const entries = performance.getEntries();
+        res.time.clear();
+        const entries2 = performance.getEntries();
+        expect(entries.filter(entry => entry.name.endsWith('1234::foo'))).to.have.length(3);
+        expect(entries2.filter(entry => entry.name.endsWith('1234::foo'))).to.have.length(0);
+      });
+    });
+
     describe('application', () => {
       it('should initialize an app instance', () => {
         app = server('foo');

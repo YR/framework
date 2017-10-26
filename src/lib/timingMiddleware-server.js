@@ -12,6 +12,7 @@ module.exports = function() {
     res.time('route');
     onFinished(res, (err, res) => {
       res.time('response');
+      res.time.clear();
     });
     next();
   };

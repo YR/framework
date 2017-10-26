@@ -20,6 +20,4 @@ module.exports = function() {
  */
 function finished() {
   this.time('response');
-  this.off('finish', finished);
-  this.off('close', finished);
 }

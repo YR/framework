@@ -48,11 +48,17 @@
   "main": "src/server.js",
   "repository": "https://github.com/YR/framework.git",
   "license": "MIT",
+  "engines": {
+    "node": ">=8.5"
+  },
   "scripts": {
     "prepublish": "buddy build",
     "test": "NODE_ENV=test mocha test/test.js --reporter spec --bail"
   },
-  "browser": "client.js",
+  "browser": {
+    "src/server.js": "client.js",
+    "perf_hooks": false
+  },
   "buddy": {
     "build": [
       {
