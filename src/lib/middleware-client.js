@@ -9,7 +9,7 @@ module.exports = {
    * @param {Express} app
    */
   register(app) {
-    app.use(timingMiddleware());
     app.use(idMiddleware(app.get('uid')));
+    app.use(timingMiddleware());
   }
 };

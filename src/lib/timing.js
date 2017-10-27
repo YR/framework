@@ -24,7 +24,7 @@ function time(name, action) {
   }
 
   const type = typeof action;
-  const uname = `${this.id}::${name}`;
+  const uname = `${name}::${this.id}`;
   let entry, startTime, tempName;
 
   switch (type) {

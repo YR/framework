@@ -565,7 +565,7 @@ describe('framework', () => {
           handle(req, res, done) {
             setTimeout(() => {
               super.handle(req, res, done);
-            }, 20);
+            }, 50);
           }
         }
 

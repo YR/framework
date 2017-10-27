@@ -18,9 +18,11 @@ module.exports = function writeFactory(page, req, res) {
     if (!req.reloaded && page != null && page.state === (INITED | HANDLING)) {
       page.debug('rendering (write)');
       page.appendState(RENDERING);
+      res.writing = true;
       res.time('write');
       page.render(req, res, () => {
         res.time('write');
+        res.writing = undefined;
         page.debug('rendered (write)');
         page.appendState(-RENDERING);
       });

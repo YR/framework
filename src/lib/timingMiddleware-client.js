@@ -19,5 +19,7 @@ module.exports = function() {
  * Context bound to 'res'
  */
 function finished() {
+  this.off('finish', finished);
+  this.off('close', finished);
   this.time('response');
 }
