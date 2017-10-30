@@ -2,7 +2,10 @@
 
 const now = require('performance-now');
 
-const hasPerformance = typeof performance !== 'undefined';
+const hasPerformance =
+  typeof performance !== 'undefined' &&
+  typeof performance.mark !== 'undefined' &&
+  typeof performance.measure !== 'undefined';
 
 /**
  * Patch 'proto' with time behaviour
