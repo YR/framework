@@ -11,7 +11,7 @@
     "cookie-parser": "1.4.3",
     "debug": "3.x.x",
     "helmet": "3.9.0",
-    "inline-source": "5.2.5",
+    "inline-source": "5.2.6",
     "ms": "2.0.0",
     "on-finished": "2.3.x",
     "performance-now": "2.1.0",
