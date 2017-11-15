@@ -30,9 +30,10 @@ module.exports = function cacheControl(maxage, upstream) {
   // Pass through upstream header value
   if (upstream != null) {
     if (Array.isArray(upstream)) {
+      const flattened = flatten(upstream, []);
       let min = Infinity;
 
-      upstream.forEach(header => {
+      flattened.forEach(header => {
         if (header == null) {
           return;
         }
@@ -41,7 +42,7 @@ module.exports = function cacheControl(maxage, upstream) {
         }
 
         const match = RE_MAX_AGE.exec(header['cache-control']);
-        const value = match != null && match.length > 0 && parseInt(match[1], 10) || Infinity;
+        const value = (match != null && match.length > 0 && parseInt(match[1], 10)) || Infinity;
 
         // Take highest if within GRACE
         if (value < min + GRACE) {
@@ -73,3 +74,21 @@ module.exports = function cacheControl(maxage, upstream) {
 
   throw Error(`Invalid cache control value: ${maxage}`);
 };
+
+/**
+ * Flatten nested arrays in 'arr'
+ * @param {Array} arr
+ * @param {Array} result
+ */
+function flatten(arr, result) {
+  for (let i = 0, n = arr.length; i < n; i++) {
+    const value = arr[i];
+
+    if (Array.isArray(value)) {
+      flatten(value, result);
+    } else {
+      result.push(value);
+    }
+  }
+  return result;
+}

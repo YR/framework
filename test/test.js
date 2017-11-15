@@ -2,7 +2,6 @@
 
 const { execSync: exec } = require('child_process');
 const { expect } = require('chai');
-const { performance } = require('perf_hooks');
 const cacheControlClient = require('../src/lib/cacheControl-client');
 const cacheControlServer = require('../src/lib/cacheControl-server');
 const clientPageHandlerFactory = require('../src/lib/pageHandlerFactory-client');
@@ -293,6 +292,12 @@ describe('framework', () => {
 
         res.cacheControl('1hr', upstream);
         expect(res['Cache-Control']).to.eql('public, max-age=340');
+      });
+      it('should pass through shortest cache value from deeply nested array of header objects', () => {
+        const upstream = [[[{ 'cache-control': 'public, max-age=360' }]], [{ 'cache-control': 'public, max-age=350' }]];
+
+        res.cacheControl('1hr', upstream);
+        expect(res['Cache-Control']).to.eql('public, max-age=350');
       });
       it('should pass through highest cache value when within grace amount', () => {
         const upstream = [
