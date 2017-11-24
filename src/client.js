@@ -6,7 +6,6 @@ const express = require('@yr/express-client');
 const middleware = require('./lib/middleware-client');
 const Page = require('./lib/Page');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-client');
-const rerender = require('./lib/rerender');
 const timing = require('./lib/timing');
 const uuid = require('uuid');
 
@@ -42,8 +41,7 @@ module.exports = function client(id, options) {
   }
   options.uid = `client:${uuid.v4()}`;
 
-  // Patch with rerender() behaviour
-  return rerender(application(id, 0, express, options));
+  return application(id, 0, express, options);
 };
 
 module.exports.Page = Page;

@@ -8,7 +8,6 @@ const clientPageHandlerFactory = require('../src/lib/pageHandlerFactory-client')
 const fooPage = require('./fixtures/foo');
 const onFinished = require('on-finished');
 const Page = require('../src/lib/Page');
-const rerender = require('../src/lib/rerender');
 const request = require('supertest');
 const server = require('../src/server');
 const serverPageHandlerFactory = require('../src/lib/pageHandlerFactory-server');
@@ -60,7 +59,6 @@ describe('framework', () => {
         return { req, res };
       }
     };
-    rerender(app);
     res = {
       app,
       time() {},
@@ -602,19 +600,6 @@ describe('framework', () => {
         setTimeout(() => {
           expect(called).to.eql(['init1', 'render1', 'render1', 'handle1', 'render1']);
           done();
-        }, 50);
-      });
-      it('should allow for page rerender', done => {
-        const page = new BasePage('1', app);
-        const handler = clientPageHandlerFactory(page);
-
-        handler(req, res, done);
-        setTimeout(() => {
-          app.rerender();
-          setTimeout(() => {
-            expect(called).to.eql(['init1', 'handle1', 'render1', 'render1']);
-            done();
-          }, 10);
         }, 50);
       });
     });
