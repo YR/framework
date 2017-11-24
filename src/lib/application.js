@@ -21,13 +21,7 @@ const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render'];
  * @returns {Express}
  */
 module.exports = function application(id, port, express, options) {
-  const {
-    middleware,
-    pages = {},
-    pageHandlerFactory,
-    params,
-    render
-  } = options;
+  const { middleware, pages = {}, pageHandlerFactory, params, render } = options;
   const app = express();
   const debug = debugFactory(id);
 
@@ -42,8 +36,13 @@ module.exports = function application(id, port, express, options) {
   app.set('page', null);
   app.set('view', null);
   app.set('views', null);
-  // Factory
-  app.set('render', render && render(app));
+  if (render != null) {
+    // Factory
+    const renderFn = render(app);
+
+    app.set('render', renderFn);
+    app.render = renderFn;
+  }
 
   // Register middleware/params stack
   if (middleware != null && middleware.register != null) {
