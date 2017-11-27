@@ -34,15 +34,16 @@ module.exports = function application(id, port, express, options) {
   app.set('debug', debug);
   app.set('id', id);
   app.set('page', null);
-  app.set('view', null);
+  app.set('view cache', true);
+  app.set('view engine', 'html');
   app.set('views', null);
-  if (render != null) {
-    // Factory
-    const renderFn = render(app);
 
-    app.set('render', renderFn);
-    app.render = renderFn;
-  }
+  const renderFn =
+    render != null
+      ? render(app)
+      : function emptyRender(options, page) {
+          throw Error('missing "render" function factory in application init');
+        };
 
   // Register middleware/params stack
   if (middleware != null && middleware.register != null) {
@@ -64,6 +65,12 @@ module.exports = function application(id, port, express, options) {
       routes.forEach(route => {
         debug('handling %s at %s', id, route);
         app.get(route, pageHandlerFactory(page));
+        // Cache view engine
+        app.cache[id] = {
+          render(options, done) {
+            done(null, renderFn(options, page));
+          }
+        };
       });
     }
   }
