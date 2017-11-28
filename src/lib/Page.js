@@ -23,7 +23,7 @@ module.exports = class Page {
    */
   constructor(id, app) {
     this.app = app;
-    this.debug = debugFactory(`${app.get('id')}:${id}`);
+    this.debug = debugFactory(`${app.get('id')}:page:${id}`);
     this.id = id;
     this.initialised = false;
     this.state = 0;

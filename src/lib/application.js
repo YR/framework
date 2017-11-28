@@ -45,6 +45,8 @@ module.exports = function application(id, port, express, options) {
           throw Error('missing "render" function factory in application init');
         };
 
+  app.set('renderer', renderFn);
+
   // Register middleware/params stack
   if (middleware != null && middleware.register != null) {
     middleware.register(app);
