@@ -10,14 +10,14 @@
     performance-now "2.1.0"
     raf "3.4.0"
 
-"@yr/express-client@4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@yr/express-client/-/express-client-4.1.0.tgz#b706235b4f34925276a5ba459b4672ebbb73e07b"
+"@yr/express-client@4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@yr/express-client/-/express-client-4.1.1.tgz#dc6a07a8a9185f26a0717baf538e4c7d849acef7"
   dependencies:
     "@yr/url-utils" "2.3.x"
     cookie "0.3.x"
     debug "3.x.x"
-    eventemitter3 "2.0.x"
+    eventemitter3 "3.0.x"
     path-to-regexp "1.7.x"
     query-string "5.0.x"
 
@@ -1212,9 +1212,9 @@ etag@~1.8.0:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
 
-eventemitter3@2.0.x:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-2.0.3.tgz#b5e1079b59fb5e1ba2771c0a993be060a58c99ba"
+eventemitter3@3.0.x:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-3.0.0.tgz#fc29ecf233bd19fbd527bb4089bbf665dc90c1e3"
 
 expand-brackets@^0.1.4:
   version "0.1.5"
