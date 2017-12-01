@@ -186,7 +186,7 @@ function setPage(req, res, done) {
         return void done(err);
       }
       // Guard against possible reassignment to new page
-      if (pending != null || currentPage !== current || currentPage.state !== INITED) {
+      if (pending != null || currentPage !== current) {
         currentPage.debug('aborting render', currentPage.state);
         return void done();
       }
