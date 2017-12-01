@@ -1,7 +1,7 @@
 {
   "name": "@yr/framework",
   "description": "A universal application framework based on Express.js",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "@yr/clock": "2.0.x",
