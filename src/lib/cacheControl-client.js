@@ -4,7 +4,7 @@ const cacheControlDuration = require('./cacheControlDuration');
 const clock = require('@yr/clock');
 
 /**
- * Patch 'proto' with cacheControl behaviour
+ * Patch Response 'proto' with cacheControl behaviour
  * @param {Object} proto
  */
 module.exports = function(proto) {

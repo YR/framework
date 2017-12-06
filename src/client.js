@@ -8,10 +8,12 @@ const Page = require('./lib/Page');
 const pageHandlerFactory = require('./lib/pageHandlerFactory-client');
 const timing = require('./lib/timing');
 const uuid = require('uuid');
+const write = require('./lib/write');
 
 // Patch response with additional behaviour
 cacheControl(express.response);
 timing(express.response);
+write(express.response);
 
 /**
  * Retrieve and initialise client instance

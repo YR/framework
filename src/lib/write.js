@@ -3,29 +3,30 @@
 const { INITED, HANDLING, RENDERING } = require('./Page');
 
 /**
- * Retrieve partial render function for 'page'
- * @param {Page} page
- * @param {Request} req
- * @param {Response} res
- * @returns {Function}
+ * Patch Response 'proto' with write behaviour
+ * @param {Object} proto
  */
-module.exports = function writeFactory(page, req, res) {
-  /**
-   * Partial render
-   */
-  return function write() {
-    // Only relevant during HANDLING phase for original request
-    if (!req.reloaded && page != null && page.state === (INITED | HANDLING)) {
-      page.debug('rendering (write)');
-      page.appendState(RENDERING);
-      res.writing = true;
-      res.time('write');
-      page.render(req, res, () => {
-        res.time('write');
-        res.writing = undefined;
-        page.debug('rendered (write)');
-        page.appendState(-RENDERING);
-      });
-    }
-  };
+module.exports = function(proto) {
+  proto.write = write;
 };
+
+/**
+ * Partial render
+ */
+function write() {
+  const page = this.app.get('page');
+
+  // Only relevant during HANDLING phase for original request
+  if (!this.req.reloaded && page != null && page.state === (INITED | HANDLING)) {
+    page.debug('rendering (write)');
+    page.appendState(RENDERING);
+    this.writing = true;
+    this.time('write');
+    page.render(this.req, this, () => {
+      this.time('write');
+      this.writing = undefined;
+      page.debug('rendered (write)');
+      page.appendState(-RENDERING);
+    });
+  }
+}

@@ -62,7 +62,10 @@ describe('framework', () => {
     res = {
       app,
       time() {},
-      end() {}
+      end() {},
+      write() {
+        app.page.render();
+      }
     };
     clientPageHandlerFactory.__reset();
   });

@@ -8,7 +8,7 @@ const hasPerformance =
   typeof performance.measure !== 'undefined';
 
 /**
- * Patch 'proto' with time behaviour
+ * Patch Response 'proto' with time behaviour
  * @param {Object} proto
  */
 module.exports = function(proto) {

@@ -1,7 +1,6 @@
 'use strict';
 
 const clock = require('@yr/clock');
-const write = require('./write');
 
 const {
   INITING,
@@ -16,7 +15,6 @@ const {
   UNHANDLED
 } = require('./Page');
 
-const noop = () => {};
 let current = null;
 let pending = null;
 
@@ -35,11 +33,8 @@ module.exports = function pageHandler(page) {
   return function pageHandle(req, res, next) {
     res.time('route');
     pending = page;
-    // Enable partial render support
-    res.write = write(page, req, res);
+    res.app.set('page', page);
     changePage(req, res, err => {
-      // Restore default
-      res.write = noop;
       if (err != null) {
         return void next(err);
       }
@@ -174,7 +169,6 @@ function setPage(req, res, done) {
   if (currentPage.state === INITED) {
     current = currentPage;
     pending = null;
-    res.app.set('page', currentPage);
     currentPage.debug('handling');
     currentPage.appendState(HANDLING);
     res.time('handle');
