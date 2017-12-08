@@ -15,9 +15,10 @@ module.exports = function(proto) {
  */
 function write() {
   const page = this.app.get('page');
+  const reloaded = this.req != null && this.req.reloaded;
 
   // Only relevant during HANDLING phase for original request
-  if (!this.req.reloaded && page != null && page.state === (INITED | HANDLING)) {
+  if (!reloaded && page != null && page.state === (INITED | HANDLING)) {
     page.debug('rendering (write)');
     page.appendState(RENDERING);
     this.writing = true;
