@@ -86,7 +86,13 @@ function load(dir, options) {
     }
     // App config is already included in 'settings', so ignore
     if (dirpath !== dir && fs.existsSync(settingspath)) {
-      settings.set(id, require(settingspath));
+      let settingsModule = require(settingspath);
+
+      if (settingsModule.default) {
+        settingsModule = settingsModule.default;
+      }
+
+      settings.set(id, settingsModule);
     }
   });
 }
