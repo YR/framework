@@ -47,7 +47,7 @@ if (process.env.NODE_ENV !== 'production') {
    * Reset current/pending page state
    * Private: this is only for testing!
    */
-  module.exports.__reset = function() {
+  module.exports.__reset = function () {
     current = null;
     pending = null;
   };
@@ -165,6 +165,10 @@ function unhandlePage(page, req, res, done) {
  */
 function setPage(req, res, done) {
   const currentPage = pending;
+
+  if (!currentPage) {
+    return void done();
+  }
 
   if (currentPage.state === INITED) {
     current = currentPage;
