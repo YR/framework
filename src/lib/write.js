@@ -1,12 +1,12 @@
 'use strict';
 
-const { INITED, HANDLING, RENDERING } = require('./Page');
+const { INITED, HANDLING, RENDERING, RENDERED } = require('./Page');
 
 /**
  * Patch Response 'proto' with write behaviour
  * @param {Object} proto
  */
-module.exports = function(proto) {
+module.exports = function (proto) {
   proto.write = write;
 };
 
@@ -18,7 +18,7 @@ function write() {
   const reloaded = this.req != null && this.req.reloaded;
 
   // Only relevant during HANDLING phase for original request
-  if (!reloaded && page != null && page.state === (INITED | HANDLING)) {
+  if (!reloaded && page != null && (page.state === (INITED | HANDLING) || page.state === (INITED | HANDLING | RENDERED))) {
     page.debug('rendering (write)');
     page.appendState(RENDERING);
     this.writing = true;
