@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-const cacheControlDuration = require('./cacheControlDuration');
-const clock = require('@yr/clock');
+const cacheControlDuration = require("./cacheControlDuration");
+const clock = require("@yr/clock");
 
 /**
  * Patch Response 'proto' with cacheControl behaviour
@@ -12,13 +12,13 @@ module.exports = function(proto) {
 };
 
 /**
- * Set cache control header based on 'maxage'
- * @param {String|Number|Boolean} maxage
- * @param {Array|Object} [upstream]
+ * Set cache control header based on 'defaultMaxAge'
+ * @param {String|Number|Boolean} defaultMaxAge
+ * @param {Array|Number} [upstreamMaxAge]
  * @returns {Object}
  */
-function cacheControl(maxage, upstream) {
-  const duration = cacheControlDuration(maxage, upstream);
+function cacheControl(defaultMaxAge, upstreamMaxAge) {
+  const duration = cacheControlDuration(defaultMaxAge, upstreamMaxAge);
 
   if (duration > 0) {
     clock.timeout(
@@ -26,7 +26,7 @@ function cacheControl(maxage, upstream) {
       () => {
         this.app.reload();
       },
-      'cacheControl'
+      "cacheControl"
     );
   }
 

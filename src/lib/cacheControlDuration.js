@@ -1,86 +1,67 @@
-'use strict';
+"use strict";
 
-const ms = require('ms');
-
-const GRACE = 10;
-const RE_MAX_AGE = /max-age=(\d+)/;
+const ms = require("ms");
 
 /**
  * Retrieve cache control duration (in seconds)
- * based on 'maxage' and optional 'upstream' headers
- * @param {String|Number|Boolean} maxage
- * @param {Array|Object} [upstream]
+ * based on 'defaultMaxAge' and optional 'upstreamMaxAge'
+ * @param {String|Number|Boolean} defaultMaxAge Formatted time or a value in seconds
+ * @param {Array|Object} [upstreamMaxAge] Value in seconds or an array of potentially nested values in seconds
  * @returns {Number}
  */
-module.exports = function cacheControl(maxage, upstream) {
-  if (maxage === false || maxage === 0) {
+module.exports = function cacheControl(defaultMaxAge, upstreamMaxAge) {
+  if (defaultMaxAge === false || defaultMaxAge === 0) {
     return 0;
   }
 
+  let calculatedMaxAge = defaultMaxAge;
+
   // Try and parse value if String
-  if (typeof maxage === 'string') {
-    const tmp = ms(maxage);
+  if (typeof calculatedMaxAge === "string") {
+    const tmp = ms(calculatedMaxAge);
 
     // Convert to seconds
-    if (tmp != null && typeof tmp === 'number') {
-      maxage = tmp / 1000;
+    if (tmp != null && typeof tmp === "number") {
+      calculatedMaxAge = tmp / 1000;
     }
+  }
+
+  if (typeof calculatedMaxAge !== "number") {
+    throw Error(`Invalid cache control value: ${calculatedMaxAge}`);
   }
 
   // Pass through upstream header value
-  if (upstream != null) {
-    if (Array.isArray(upstream)) {
-      const flattened = flatten(upstream, []);
-      let min = Infinity;
+  if (upstreamMaxAge != null) {
+    const flattenedMaxAges = Array.isArray(upstreamMaxAge)
+      ? flatten(upstreamMaxAge, [])
+      : [upstreamMaxAge];
 
-      flattened.forEach(header => {
-        if (header == null) {
-          return;
-        }
-        if ('headers' in header) {
-          header = header.headers;
-        }
-
-        const match = RE_MAX_AGE.exec(header['cache-control']);
-        const value = (match != null && match.length > 0 && parseInt(match[1], 10)) || Infinity;
-
-        // Take highest if within GRACE
-        if (value < min + GRACE) {
-          min = value;
-          maxage = header['cache-control'];
-        }
-      });
-    } else {
-      if ('headers' in upstream) {
-        upstream = upstream.headers;
+    flattenedMaxAges.forEach(maxAge => {
+      if (maxAge == null) {
+        return;
       }
-      if (upstream['cache-control'] != null) {
-        maxage = upstream['cache-control'];
+
+      if (typeof maxAge !== "number") {
+        throw Error(`Invalid cache control value: ${maxAge}`);
       }
-    }
+
+      // Use the lower max age
+      if (maxAge < calculatedMaxAge) {
+        calculatedMaxAge = maxAge;
+      }
+    });
   }
 
-  // Value as number
-  if (typeof maxage === 'number') {
-    return maxage;
-  }
-
-  // Full header
-  if (typeof maxage === 'string' && ~maxage.indexOf('max-age=')) {
-    const match = RE_MAX_AGE.exec(maxage);
-
-    return (match != null && match.length > 0 && parseInt(match[1], 10)) || 0;
-  }
-
-  throw Error(`Invalid cache control value: ${maxage}`);
+  return calculatedMaxAge;
 };
 
 /**
  * Flatten nested arrays in 'arr'
  * @param {Array} arr
- * @param {Array} result
  */
-function flatten(arr, result) {
+function flatten(arr) {
+  const result = [];
+
   for (let i = 0, n = arr.length; i < n; i++) {
     const value = arr[i];
 
@@ -90,5 +71,6 @@ function flatten(arr, result) {
       result.push(value);
     }
   }
+
   return result;
 }
