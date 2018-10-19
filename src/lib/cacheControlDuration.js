@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-const ms = require("ms");
+const ms = require('ms');
 
 /**
  * Retrieve cache control duration (in seconds)
@@ -17,16 +17,16 @@ module.exports = function cacheControl(defaultMaxAge, upstreamMaxAge) {
   let calculatedMaxAge = defaultMaxAge;
 
   // Try and parse value if String
-  if (typeof calculatedMaxAge === "string") {
+  if (typeof calculatedMaxAge === 'string') {
     const tmp = ms(calculatedMaxAge);
 
     // Convert to seconds
-    if (tmp != null && typeof tmp === "number") {
+    if (tmp != null && typeof tmp === 'number') {
       calculatedMaxAge = tmp / 1000;
     }
   }
 
-  if (typeof calculatedMaxAge !== "number") {
+  if (typeof calculatedMaxAge !== 'number') {
     throw Error(`Invalid cache control value: ${calculatedMaxAge}`);
   }
 
@@ -41,7 +41,7 @@ module.exports = function cacheControl(defaultMaxAge, upstreamMaxAge) {
         return;
       }
 
-      if (typeof maxAge !== "number") {
+      if (typeof maxAge !== 'number') {
         throw Error(`Invalid cache control value: ${maxAge}`);
       }
 
