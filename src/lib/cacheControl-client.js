@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const cacheControlDuration = require("./cacheControlDuration");
-const clock = require("@yr/clock");
+const cacheControlDuration = require('./cacheControlDuration');
+const clock = require('@yr/clock');
 
 /**
  * Patch Response 'proto' with cacheControl behaviour
@@ -26,7 +26,7 @@ function cacheControl(defaultMaxAge, upstreamMaxAge) {
       () => {
         this.app.reload();
       },
-      "cacheControl"
+      'cacheControl'
     );
   }
 
