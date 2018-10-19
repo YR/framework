@@ -240,88 +240,77 @@ describe('framework', () => {
         cacheControlServer(res);
       });
 
-      it('should set no-cache when passed "false"', () => {
+      it('should set no-cache when passed "false" as defaultMaxAge', () => {
         res.cacheControl(false);
         expect(res['Cache-Control']).to.eql('private, no-cache');
       });
-      it('should set no-cache when passed "0"', () => {
+      it('should set no-cache when passed "0" as defaultMaxAge', () => {
         res.cacheControl(0);
         expect(res['Cache-Control']).to.eql('private, no-cache');
       });
-      it('should pass through a valid header string', () => {
-        res.cacheControl('public, max-age=1000');
-        expect(res['Cache-Control']).to.eql('public, max-age=1000');
-      });
-      it('should convert a maxage value passed as String', () => {
+      it('should convert a defaultMaxAge value passed as String', () => {
         res.cacheControl('1hr');
         expect(res['Cache-Control']).to.eql('public, max-age=3600');
       });
-      it('should add a maxage value passed as Number', () => {
+      it('should use defaultMaxAge value passed as Number', () => {
         res.cacheControl(3600);
         expect(res['Cache-Control']).to.eql('public, max-age=3600');
       });
-      it('should pass through cache value from header object', () => {
-        const upstream = {
-          'cache-control': 'public, max-age=360'
-        };
+      it('should pass through upstreamMaxAge number if lower than default defaultMaxAge', () => {
+        const upstreamMaxAge = 360;
 
-        res.cacheControl('1hr', upstream);
+        res.cacheControl('1hr', upstreamMaxAge);
         expect(res['Cache-Control']).to.eql('public, max-age=360');
       });
-      it('should pass through cache value from object with "headers"', () => {
-        const value = {
-          headers: {
-            'cache-control': 'public, max-age=360'
-          }
-        };
+      it('should pass through single number from upstreamMaxAge array if lower than default defaultMaxAge', () => {
+        const upstreamMaxAge = [360];
 
-        res.cacheControl('1hr', value);
+        res.cacheControl('1hr', upstreamMaxAge);
         expect(res['Cache-Control']).to.eql('public, max-age=360');
       });
-      it('should pass through shortest cache value from array of header objects', () => {
-        const upstream = [{ 'cache-control': 'public, max-age=360' }, { 'cache-control': 'public, max-age=350' }];
+      it('should pass through lowest number from upstreamMaxAge array if lower than default defaultMaxAge', () => {
+        const upstreamMaxAge = [360, 350];
 
-        res.cacheControl('1hr', upstream);
+        res.cacheControl('1hr', upstreamMaxAge);
         expect(res['Cache-Control']).to.eql('public, max-age=350');
       });
-      it('should pass through shortest cache value from array of objects with "headers"', () => {
-        const upstream = [
-          { headers: { 'cache-control': 'public, max-age=360' } },
-          null,
-          { headers: { 'cache-control': 'public, max-age=340' } }
-        ];
+      it('should pass through lowest valid number from upstreamMaxAge array if lower than default defaultMaxAge', () => {
+        const upstreamMaxAge = [360, null, 340];
 
-        res.cacheControl('1hr', upstream);
+        res.cacheControl('1hr', upstreamMaxAge);
         expect(res['Cache-Control']).to.eql('public, max-age=340');
       });
-      it('should pass through shortest cache value from deeply nested array of header objects', () => {
-        const upstream = [[[{ 'cache-control': 'public, max-age=360' }]], [{ 'cache-control': 'public, max-age=350' }]];
+      it('should pass through lowest valid number from deeply nested upstreamMaxAge array if lower than default defaultMaxAge', () => {
+        const upstreamMaxAge = [[[360]], [350]];
 
-        res.cacheControl('1hr', upstream);
+        res.cacheControl('1hr', upstreamMaxAge);
         expect(res['Cache-Control']).to.eql('public, max-age=350');
       });
-      it('should pass through highest cache value when within grace amount', () => {
-        const upstream = [
-          { headers: { 'cache-control': 'public, max-age=351' } },
-          { headers: { 'cache-control': 'public, max-age=360' } }
-        ];
+      it('should pass through highest value from upstreamMaxAge when within grace amount', () => {
+        const upstreamMaxAge = [351, 360];
 
-        res.cacheControl('1hr', upstream);
+        res.cacheControl('1hr', upstreamMaxAge);
         expect(res['Cache-Control']).to.eql('public, max-age=360');
       });
-      it('should fall back to passed maxage when passed header object does not contain "cache-control"', () => {
-        const upstream = {};
+      it('should fall back to defaultMaxAge when upstreamMaxAge array is not a valid number or array', () => {
+        const upstreamMaxAge = null;
 
-        res.cacheControl('1hr', upstream);
+        res.cacheControl('1hr', upstreamMaxAge);
         expect(res['Cache-Control']).to.eql('public, max-age=3600');
       });
-      it('should fall back to passed maxage when array of header objects do not contain "cache-control"', () => {
-        const upstream = [{}, null, null, {}];
+      it('should fall back to defaultMaxAge when upstreamMaxAge array is empty', () => {
+        const upstreamMaxAge = [];
 
-        res.cacheControl('1hr', upstream);
+        res.cacheControl('1hr', upstreamMaxAge);
         expect(res['Cache-Control']).to.eql('public, max-age=3600');
       });
-      it('should throw when passed an invalid value', () => {
+      it('should fall back to defaultMaxAge when upstreamMaxAge array does not contain any valid numbers', () => {
+        const upstreamMaxAge = [null, undefined, 'foobar'];
+
+        res.cacheControl('1hr', upstreamMaxAge);
+        expect(res['Cache-Control']).to.eql('public, max-age=3600');
+      });
+      it('should throw when passed an invalid defaultMaxAge value', () => {
         try {
           res.cacheControl(true);
           expect.fail();
@@ -382,7 +371,14 @@ describe('framework', () => {
         handler2(req, res, done);
         expect(called).to.eql(['init1']);
         setTimeout(() => {
-          expect(called).to.eql(['init1', 'init2', 'handle2', 'render2', 'handle1', 'render1']);
+          expect(called).to.eql([
+            'init1',
+            'init2',
+            'handle2',
+            'render2',
+            'handle1',
+            'render1'
+          ]);
           done();
         }, 50);
       });
@@ -450,9 +446,22 @@ describe('framework', () => {
         handler1(req, res, done);
         expect(called).to.eql(['init1', 'handle1', 'render1']);
         handler2(req, res, done);
-        expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1', 'init2', 'handle2', 'render2']);
-        expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-        expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+        expect(called).to.eql([
+          'init1',
+          'handle1',
+          'render1',
+          'unrender1',
+          'unhandle1',
+          'init2',
+          'handle2',
+          'render2'
+        ]);
+        expect(page1.state).to.equal(
+          Page.INITED | Page.UNRENDERED | Page.UNHANDLED
+        );
+        expect(page2.state).to.equal(
+          Page.INITED | Page.HANDLED | Page.RENDERED
+        );
         done();
       });
       it('should asynchronously unhandle an existing page request', done => {
@@ -490,8 +499,12 @@ describe('framework', () => {
             'render2'
           ]);
           expect(app.page).to.equal(page2);
-          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
-          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          expect(page1.state).to.equal(
+            Page.INITED | Page.UNRENDERED | Page.UNHANDLED
+          );
+          expect(page2.state).to.equal(
+            Page.INITED | Page.HANDLED | Page.RENDERED
+          );
           done();
         }, 50);
       });
@@ -514,7 +527,13 @@ describe('framework', () => {
         handler1(req, res, done);
         handler2(req, res, done);
         handler3(req, res, done);
-        expect(called).to.eql(['init1', 'handle1', 'render1', 'unrender1', 'unhandle1']);
+        expect(called).to.eql([
+          'init1',
+          'handle1',
+          'render1',
+          'unrender1',
+          'unhandle1'
+        ]);
         setTimeout(() => {
           expect(called).to.eql([
             'init1',
@@ -528,9 +547,13 @@ describe('framework', () => {
             'render3'
           ]);
           expect(app.page).to.equal(page3);
-          expect(page1.state).to.equal(Page.INITED | Page.UNRENDERED | Page.UNHANDLED);
+          expect(page1.state).to.equal(
+            Page.INITED | Page.UNRENDERED | Page.UNHANDLED
+          );
           expect(page2.state).to.equal(Page.INITED);
-          expect(page3.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          expect(page3.state).to.equal(
+            Page.INITED | Page.HANDLED | Page.RENDERED
+          );
           done();
         }, 50);
       });
@@ -559,9 +582,18 @@ describe('framework', () => {
         handler2(req, res, done);
         expect(called).to.eql(['init1', 'unhandle1']);
         setTimeout(() => {
-          expect(called).to.eql(['init1', 'unhandle1', 'init2', 'handle2', 'render2', 'handle1']);
+          expect(called).to.eql([
+            'init1',
+            'unhandle1',
+            'init2',
+            'handle2',
+            'render2',
+            'handle1'
+          ]);
           expect(page1.state).to.equal(Page.INITED | Page.UNHANDLED);
-          expect(page2.state).to.equal(Page.INITED | Page.HANDLED | Page.RENDERED);
+          expect(page2.state).to.equal(
+            Page.INITED | Page.HANDLED | Page.RENDERED
+          );
           expect(app.page).to.equal(page2);
           done();
         }, 50);
@@ -601,7 +633,13 @@ describe('framework', () => {
         handler(req, res, done);
         expect(called).to.eql(['init1', 'render1']);
         setTimeout(() => {
-          expect(called).to.eql(['init1', 'render1', 'render1', 'handle1', 'render1']);
+          expect(called).to.eql([
+            'init1',
+            'render1',
+            'render1',
+            'handle1',
+            'render1'
+          ]);
           done();
         }, 50);
       });

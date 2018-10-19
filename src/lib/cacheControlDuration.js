@@ -2,6 +2,8 @@
 
 const ms = require('ms');
 
+const GRACE = 10;
+
 /**
  * Retrieve cache control duration (in seconds)
  * based on 'defaultMaxAge' and optional 'upstreamMaxAge'
@@ -33,21 +35,15 @@ module.exports = function cacheControl(defaultMaxAge, upstreamMaxAge) {
   // Pass through upstream header value
   if (upstreamMaxAge != null) {
     const flattenedMaxAges = Array.isArray(upstreamMaxAge)
-      ? flatten(upstreamMaxAge, [])
-      : [upstreamMaxAge];
+    ? flatten(upstreamMaxAge, [])
+    : [upstreamMaxAge];
 
     flattenedMaxAges.forEach(maxAge => {
-      if (maxAge == null) {
-        return;
-      }
-
-      if (typeof maxAge !== 'number') {
-        throw Error(`Invalid cache control value: ${maxAge}`);
-      }
-
-      // Use the lower max age
-      if (maxAge < calculatedMaxAge) {
-        calculatedMaxAge = maxAge;
+      if (typeof maxAge === 'number') {
+        // Use the lower max age
+        if (maxAge < calculatedMaxAge + GRACE) {
+          calculatedMaxAge = maxAge;
+        }
       }
     });
   }
@@ -58,10 +54,9 @@ module.exports = function cacheControl(defaultMaxAge, upstreamMaxAge) {
 /**
  * Flatten nested arrays in 'arr'
  * @param {Array} arr
+ * @param {Array} result
  */
-function flatten(arr) {
-  const result = [];
-
+function flatten(arr, result) {
   for (let i = 0, n = arr.length; i < n; i++) {
     const value = arr[i];
 
