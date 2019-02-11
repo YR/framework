@@ -23,7 +23,6 @@ write(express.response);
  *  - {Object} pages
  *  - {Object} params
  *  - {Object} render
- *  - {DataStore} settings
  * @returns {Express}
  */
 module.exports = function client(id, options) {
