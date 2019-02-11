@@ -43,6 +43,7 @@
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "buddy": "6.14.x",
     "chai": "^4.1.2",
+    "cross-env": "5.2.0",
     "mocha": "*",
     "supertest": "*"
   },
@@ -54,7 +55,7 @@
   },
   "scripts": {
     "prepublish": "buddy build",
-    "test": "NODE_ENV=test mocha test/test.js --reporter spec --bail"
+    "test": "cross-env NODE_ENV=test mocha test/test.js --reporter spec --bail"
   },
   "browser": "./client.js",
   "buddy": {
