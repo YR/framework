@@ -28,8 +28,9 @@ module.exports = function pageHandler(page) {
         if (err != null) {
           return void next(err);
         }
-        // Prevent rendering aborted
-        if (!req.aborted || !res.finished) {
+        // Don't attempt to render the current page
+        // if the request is aborted or we have already finished rendering.
+        if (!req.aborted && !res.finished) {
           page.debug('rendering');
           res.time('render');
           page.render(req, res, err => {
