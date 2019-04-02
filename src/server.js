@@ -33,11 +33,15 @@ timing(express.response);
  *  - {Object} pages
  *  - {Object} params
  *  - {Object} render
- *  - {DataStore} settings
  *  - {Object} templates
  * @returns {Express}
  */
-module.exports = function server(id, port = DEFAULT_PORT, dir = process.cwd(), options = {}) {
+module.exports = function server(
+  id,
+  port = DEFAULT_PORT,
+  dir = process.cwd(),
+  options = {}
+) {
   if (options.pageHandlerFactory === undefined) {
     options.pageHandlerFactory = pageHandlerFactory;
   }
@@ -70,11 +74,9 @@ module.exports.query = express.query;
  * @param {Object} options
  */
 function load(dir, options) {
-  const { locales, pages = {}, settings, templates } = options;
+  const { locales, pages = {}, templates } = options;
 
   [dir, ...Object.keys(pages).map(id => pages[id].dir)].forEach(dirpath => {
-    const id = path.basename(dirpath);
-    const settingspath = path.join(dirpath, 'settings.js');
     const localespath = path.join(dirpath, 'locales');
     const templatespath = path.join(dirpath, 'templates');
 
@@ -83,16 +85,6 @@ function load(dir, options) {
     }
     if (fs.existsSync(templatespath)) {
       templates.load(templatespath);
-    }
-    // App config is already included in 'settings', so ignore
-    if (dirpath !== dir && fs.existsSync(settingspath)) {
-      let settingsModule = require(settingspath);
-
-      if (settingsModule.default) {
-        settingsModule = settingsModule.default;
-      }
-
-      settings.set(id, settingsModule);
     }
   });
 }

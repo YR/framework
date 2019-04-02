@@ -16,12 +16,17 @@ const BLACKLIST_KEYS = ['middleware', 'pageHandlerFactory', 'render'];
  *  - {Function} pageHandlerFactory
  *  - {Object} params
  *  - {Function} render
- *  - {DataStore} settings
  *  - {Object} templates
  * @returns {Express}
  */
 module.exports = function application(id, port, express, options) {
-  const { middleware, pages = {}, pageHandlerFactory, params, render } = options;
+  const {
+    middleware,
+    pages = {},
+    pageHandlerFactory,
+    params,
+    render
+  } = options;
   const app = express();
   const debug = debugFactory(id);
 
