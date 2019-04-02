@@ -1,21 +1,21 @@
 {
   "name": "@yr/framework",
   "description": "A universal application framework based on Express.js",
-  "version": "5.0.0-alpha.3",
+  "version": "5.0.0",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
-    "@yr/clock": "2.0.x",
+    "@yr/clock": "2.1.0",
     "@yr/express": "4.15.3",
     "@yr/express-client": "^4.1.3",
-    "body-parser": "1.18.2",
-    "cookie-parser": "1.4.3",
-    "debug": "3.x.x",
-    "helmet": "3.9.0",
-    "inline-source": "5.2.6",
-    "ms": "2.0.x",
+    "body-parser": "1.18.3",
+    "cookie-parser": "1.4.4",
+    "debug": "4.1.1",
+    "helmet": "3.16.0",
+    "inline-source": "6.1.9",
+    "ms": "2.1.1",
     "on-finished": "2.3.x",
     "performance-now": "2.1.0",
-    "uuid": "3.1.0"
+    "uuid": "3.3.2"
   },
   "devDependencies": {
     "babel-plugin-syntax-trailing-function-commas": "6.22.0",
@@ -42,10 +42,10 @@
     "babel-plugin-transform-exponentiation-operator": "6.24.1",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "buddy": "6.14.x",
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "cross-env": "5.2.0",
-    "mocha": "*",
-    "supertest": "*"
+    "mocha": "6.0.2",
+    "supertest": "4.0.2"
   },
   "main": "src/server.js",
   "repository": "https://github.com/YR/framework.git",
