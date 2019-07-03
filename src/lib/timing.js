@@ -2,11 +2,6 @@
 
 const now = require('performance-now');
 
-const hasPerformance =
-  typeof performance !== 'undefined' &&
-  typeof performance.mark !== 'undefined' &&
-  typeof performance.measure !== 'undefined';
-
 /**
  * Patch Response 'proto' with time behaviour
  * @param {Object} proto
@@ -80,13 +75,19 @@ function time(name, action) {
 }
 
 function mark(name) {
-  if (hasPerformance) {
+  if (hasPerformance()) {
     performance.mark(name);
   }
 }
 
 function measure(name, startMark, endMark) {
-  if (hasPerformance) {
+  if (hasPerformance()) {
     performance.measure(name, startMark, endMark);
   }
+}
+
+function hasPerformance() {
+  return typeof performance === 'object' &&
+    typeof performance.mark === 'function' &&
+    typeof performance.measure === 'function';
 }
